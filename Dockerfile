@@ -1,6 +1,6 @@
 FROM centos:centos7
 
-MAINTAINER Nathan Lee <hwlee@itwise.co.kr>
+MAINTAINER minhee Lee <mhlee@feelingk.com>
 #jdk 1.7.80
 RUN yum -y install wget && \
     wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u80-b15/jdk-7u80-linux-x64.rpm && \
