@@ -12,3 +12,4 @@ docker-centos-hadoop-cluster
 - [Docker container networks - 멀티호스트에서 공유하는 하나의 네트워크 만들기](https://docs.docker.com/engine/userguide/networking/dockernetworks/#an-overlay-network)
 - [Get started with multi-host networking] (https://docs.docker.com/engine/userguide/networking/get-started-overlay/)
 - [Advanced Docker Networking with Pipework](https://opsbot.com/advanced-docker-networking-pipework/)
+- [Multi-Host Docker Networking is now ready for production](https://blog.docker.com/2015/11/docker-multi-host-networking-ga/)
