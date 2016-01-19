@@ -43,6 +43,8 @@ https://docs.docker.com/engine/articles/systemd/
 
 $ mkdir /home/docker
 
+$ cp -R  /var/lib/docker/* /home/docker 
+
 # service file 위치 확인
 $ sudo systemctl status docker | grep Loaded
 
