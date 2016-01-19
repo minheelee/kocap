@@ -4,22 +4,22 @@ CAP
 docker-centos-hadoop-cluster
 
 
-- [Docker ¿£ÁøÀ» CentOS¿¡ ¼³Ä¡] (https://docs.docker.com/engine/installation/centos/)
-- [Docker °³ÀÎÀúÀå¼Ò ±¸Ãà](http://longbe00.blogspot.kr/2015/03/docker_55.html)
+- [Docker ì—”ì§„ì„ CentOSì— ì„¤ì¹˜] (https://docs.docker.com/engine/installation/centos/)
+- [Docker ê°œì¸ì €ìž¥ì†Œ êµ¬ì¶•](http://longbe00.blogspot.kr/2015/03/docker_55.html)
 - [Hadoop Cluster based on Docker Ubuntu ](https://github.com/kiwenlau/hadoop-cluster-docker)
 - [docker-centos-serf](https://github.com/FayeHuang/docker-centos-serf)
-- [docker¿¡ °íÁ¤ ¾ÆÀÌÇÇ ÇÒ´çÇÏ±â](http://jhouse0317.tistory.com/entry/%EB%8F%84%EC%BB%A4%EC%97%90-%EA%B3%A0%EC%A0%95-%EC%95%84%EC%9D%B4%ED%94%BC-%ED%95%A0%EB%8B%B9%ED%95%98%EA%B8%B0)
-- [Docker container networks - ¸ÖÆ¼È£½ºÆ®¿¡¼­ °øÀ¯ÇÏ´Â ÇÏ³ªÀÇ ³×Æ®¿öÅ© ¸¸µé±â](https://docs.docker.com/engine/userguide/networking/dockernetworks/#an-overlay-network)
+- [dockerì— ê³ ì • ì•„ì´í”¼ í• ë‹¹í•˜ê¸°](http://jhouse0317.tistory.com/entry/%EB%8F%84%EC%BB%A4%EC%97%90-%EA%B3%A0%EC%A0%95-%EC%95%84%EC%9D%B4%ED%94%BC-%ED%95%A0%EB%8B%B9%ED%95%98%EA%B8%B0)
+- [Docker container networks - ë©€í‹°í˜¸ìŠ¤íŠ¸ì—ì„œ ê³µìœ í•˜ëŠ” í•˜ë‚˜ì˜ ë„¤íŠ¸ì›Œí¬ ë§Œë“¤ê¸°](https://docs.docker.com/engine/userguide/networking/dockernetworks/#an-overlay-network)
 - [Get started with multi-host networking] (https://docs.docker.com/engine/userguide/networking/get-started-overlay/)
 - [Advanced Docker Networking with Pipework](https://opsbot.com/advanced-docker-networking-pipework/)
 - [Multi-Host Docker Networking is now ready for production](https://blog.docker.com/2015/11/docker-multi-host-networking-ga/)
 
-- [Kickstart·Î centos ÀÚµ¿¼³Ä¡(pxe)](https://github.com/minheelee/kocap/blob/master/kickstart%EB%A1%9C_centos%EC%9E%90%EB%8F%99%EC%84%A4%EC%B9%98_pxe.txt)
-- [CentOS7¿¡¼­ ¸ÖÆ¼ È£½ºÆÃ ³×Æ®¿öÅ© ¼³Á¤] (https://github.com/minheelee/kocap/blob/master/centos7%EC%97%90%EC%84%9C%20%EB%A9%80%ED%8B%B0%ED%98%B8%EC%8A%A4%ED%8C%85%EC%84%A4%EC%A0%95%20%EB%B0%A9%EB%B2%95%20%EC%A0%95%EB%A6%AC.txt)
+- [Kickstartë¡œ centos ìžë™ì„¤ì¹˜(pxe)](https://github.com/minheelee/kocap/blob/master/kickstart%EB%A1%9C_centos%EC%9E%90%EB%8F%99%EC%84%A4%EC%B9%98_pxe.txt)
+- [CentOS7ì—ì„œ ë©€í‹° í˜¸ìŠ¤íŒ… ë„¤íŠ¸ì›Œí¬ ì„¤ì •] (https://github.com/minheelee/kocap/blob/master/centos7%EC%97%90%EC%84%9C%20%EB%A9%80%ED%8B%B0%ED%98%B8%EC%8A%A4%ED%8C%85%EC%84%A4%EC%A0%95%20%EB%B0%A9%EB%B2%95%20%EC%A0%95%EB%A6%AC.txt)
 
 ```
 #######################################
-# CentOS7¿¡¼­ docker ¼³Ä¡
+# CentOS7ì—ì„œ docker ì„¤ì¹˜
 #######################################
 https://docs.docker.com/engine/installation/centos/
 
@@ -39,7 +39,7 @@ $ sudo chkconfig docker on
 $ sudo docker info
 
 #######################################
-# Docker ÀÛ¾÷ µð·ºÅä¸®¸¦ º¯°æ
+# Docker ìž‘ì—… ë””ë ‰í† ë¦¬ë¥¼ ë³€ê²½
 #######################################
 https://docs.docker.com/engine/articles/systemd/
 
@@ -47,12 +47,12 @@ $ mkdir /home/docker
 
 $ cp -R  /var/lib/docker/* /home/docker 
 
-# service file À§Ä¡ È®ÀÎ
+# service file ìœ„ì¹˜ í™•ì¸
 $ sudo systemctl status docker | grep Loaded
 
-#service file¿¡ ¾Æ·¡ ³»¿ë Ãß°¡
+#service fileì— ì•„ëž˜ ë‚´ìš© ì¶”ê°€
 EnvironmentFile=-/etc/sysconfig/docker
-$OPTIONS  Ãß°¡
+$OPTIONS  ì¶”ê°€
 
 $ sudo vi /etc/sysconfig/docker
 OPTIONS="-g /home/docker"
@@ -62,14 +62,14 @@ $ sudo reboot
 
 
 #######################################
-## CentOS7¿¡¼­ docker·Î multi-host networking ¼³Á¤
+## CentOS7ì—ì„œ dockerë¡œ multi-host networking ì„¤ì •
 #######################################
 
 https://docs.docker.com/engine/userguide/networking/get-started-overlay/
 
 ######################################
-# »çÀü ÀÛ¾÷
-# 1. CentOS7¿¡¼­ kernelÀ» 3.18·Î ¾÷±×·¹ÀÌµå
+# ì‚¬ì „ ìž‘ì—…
+# 1. CentOS7ì—ì„œ kernelì„ 3.18ë¡œ ì—…ê·¸ë ˆì´ë“œ
 
 wget http://mirrors.neterra.net/elrepo/kernel/el7/x86_64/RPMS/kernel-ml-3.18.6-1.el7.elrepo.x86_64.rpm
 wget http://mirrors.neterra.net/elrepo/kernel/el7/x86_64/RPMS/kernel-ml-devel-3.18.6-1.el7.elrepo.x86_64.rpm
@@ -78,16 +78,16 @@ rpm -Uvh kernel-ml-3.18.6-1.el7.elrepo.x86_64.rpm
 rpm -Uvh kernel-ml-devel-3.18.6-1.el7.elrepo.x86_64.rpm
 
 vi /boot/grub2/grubenv
-saved_entry=CentOS Linux (3.18.6-1.el7.elrepo.x86_64) 7 (Core)  ·Î º¯°æÇÔ.
+saved_entry=CentOS Linux (3.18.6-1.el7.elrepo.x86_64) 7 (Core)  ë¡œ ë³€ê²½í•¨.
 
 reboot 
 
-# Ä¿³Î¹öÀü È®ÀÎ
+# ì»¤ë„ë²„ì „ í™•ì¸
 uname -r 
 3.18.6-1.el7.elrepo.x86_64
 
 ######################################
-# 2. docker-machine ¼³Ä¡
+# 2. docker-machine ì„¤ì¹˜
 https://docs.docker.com/machine/install-machine/
 
 curl -L https://github.com/docker/machine/releases/download/v0.5.3/docker-machine_linux-amd64 >/usr/local/bin/docker-machine && \
@@ -96,7 +96,11 @@ curl -L https://github.com/docker/machine/releases/download/v0.5.3/docker-machin
 docker-machine version
 
 ######################################
-# 3.  VirtualBox5 ¼³Ä¡
+# 3.0 gcc update
+yum install gcc
+
+######################################
+# 3.  VirtualBox5 ì„¤ì¹˜
 http://www.if-not-true-then-false.com/2010/install-virtualbox-with-yum-on-fedora-centos-red-hat-rhel/
 
 cd /etc/yum.repos.d/
