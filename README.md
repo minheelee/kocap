@@ -13,9 +13,9 @@ docker-centos-hadoop-cluster
 - [Get started with multi-host networking] (https://docs.docker.com/engine/userguide/networking/get-started-overlay/)
 - [Advanced Docker Networking with Pipework](https://opsbot.com/advanced-docker-networking-pipework/)
 - [Multi-Host Docker Networking is now ready for production](https://blog.docker.com/2015/11/docker-multi-host-networking-ga/)
-- [Kickstart로 centos 자동설치(pxe)](https://github.com/minheelee/kocap)
 
-- CentOS7에서 멀티 호스팅 네트워크 설정 (https://github.com/minheelee/kocap)
+- [Kickstart로 centos 자동설치(pxe)](https://github.com/minheelee/kocap/blob/master/kickstart%EB%A1%9C_centos%EC%9E%90%EB%8F%99%EC%84%A4%EC%B9%98_pxe.txt)
+- [CentOS7에서 멀티 호스팅 네트워크 설정] (https://github.com/minheelee/kocap/blob/master/centos7%EC%97%90%EC%84%9C%20%EB%A9%80%ED%8B%B0%ED%98%B8%EC%8A%A4%ED%8C%85%EC%84%A4%EC%A0%95%20%EB%B0%A9%EB%B2%95%20%EC%A0%95%EB%A6%AC.txt)
 
 ```
 #######################################
