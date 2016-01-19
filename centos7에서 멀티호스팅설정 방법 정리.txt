@@ -89,3 +89,96 @@ yum install VirtualBox-5.0
 
 export KERN_DIR=/usr/src/kernels/3.18.6-1.el7.elrepo.x86_64/
 /usr/lib/virtualbox/vboxdrv.sh setup
+
+######################################
+# ¼³Ä¡
+######################################
+# Step 1: Set up a key-value store
+
+docker-machine create -d virtualbox mh-keystore
+
+docker $(docker-machine config mh-keystore) run -d \
+    -p "8500:8500" \
+    -h "consul" \
+    progrium/consul -server -bootstrap
+	
+eval "$(docker-machine env mh-keystore)"
+
+docker ps
+
+######################################
+# Step 2: Create a Swarm cluster
+docker-machine create \
+  -d virtualbox \
+  --swarm --swarm-master \
+  --swarm-discovery="consul://$(docker-machine ip mh-keystore):8500" \
+  --engine-opt="cluster-store=consul://$(docker-machine ip mh-keystore):8500" \
+  --engine-opt="cluster-advertise=eth1:2376" \
+  mhs-demo0
+
+docker-machine create -d virtualbox \
+    --swarm \
+    --swarm-discovery="consul://$(docker-machine ip mh-keystore):8500" \
+    --engine-opt="cluster-store=consul://$(docker-machine ip mh-keystore):8500" \
+    --engine-opt="cluster-advertise=eth1:2376" \
+  mhs-demo1
+
+docker-machine ls
+
+######################################
+# Step 3: Create the overlay Network
+
+eval $(docker-machine env --swarm mhs-demo0)
+docker info
+
+docker network create --driver overlay my-net
+docker network ls
+
+eval $(docker-machine env mhs-demo0)
+docker network ls
+
+eval $(docker-machine env mhs-demo1)
+docker network ls
+
+######################################
+# Step 4: Run an application on your Network
+
+eval $(docker-machine env --swarm mhs-demo0)
+
+docker run -itd --name=web --net=my-net --env="constraint:node==mhs-demo0" nginx
+
+docker run -it --rm --net=my-net --env="constraint:node==mhs-demo1" busybox wget -O- http://web
+
+######################################
+#Step 5: Check external connectivity
+
+eval $(docker-machine env mhs-demo1)
+
+docker network ls
+
+eval $(docker-machine env mhs-demo0)
+docker network ls
+
+docker exec web ip addr
+
+
+######################################
+# Step 6: Extra Credit with Docker Compose
+
+eval $(docker-machine env --swarm mhs-demo0)
+
+vi docker-compose.yml
+web:
+    image: bfirsh/compose-mongodb-demo
+    environment:
+        - "MONGO_HOST=counter_mongo_1"
+        - "constraint:node==mhs-demo0"
+    ports:
+        - "80:5000"
+mongo:
+    image: mongo
+	
+	
+docker-compose --x-networking --project-name=counter up -d
+
+docker-machine ip mhs-demo0
