@@ -1,0 +1,214 @@
+0. 준비
+방화벽 OFF
+vi /etc/selinux/config
+SELINUX=disabled
+reboot
+
+장비 IP : 192.168.0.10
+
+1. TFTP 설치 및 설정
+[root@localhost /]# yum install -y tftp tftp-server
+[root@localhost /]# vi /etc/xinetd.d/tftp
+# default: off
+# description: The tftp server serves files using the trivial file transfer \
+#       protocol.  The tftp protocol is often used to boot diskless \
+#       workstations, download configuration files to network-aware printers, \
+#       and to start the installation process for some operating systems.
+service tftp
+{
+        disable = no        
+socket_type             = dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server                  = /usr/sbin/in.tftpd
+        server_args             = -s /tftpboot
+        per_source              = 11
+        cps                     = 100 2
+        flags                   = IPv4
+}
+
+[root@localhost /]# mkdir /tftpboot
+[root@localhost /]# chmod 777 -R /tftpboot
+[root@localhost /]# vi /tftpboot/readme.txt
+aaaaaaaaaaa
+
+[root@localhost /]# service xinetd restart
+[root@localhost /]# cd /tmp
+[root@localhost /]# tftp 192.168.0.10 -c get readme.txt
+
+
+2. syslinux 설치
+[root@localhost /]# yum install  -y syslinux
+
+
+3. DHCP 설치 및 설정
+[root@localhost /]# yum install -y dhcp dhcp-devel
+[root@localhost /]# vi /etc/dhcp/dhcpd.conf
+ddns-update-style none;
+allow booting;
+allow bootp;
+default-lease-time 60;
+max-lease-time 60;
+option subnet-mask              255.255.255.0;
+option domain-name-servers      8.8.8.8;
+
+class "pxeclients" {
+        match if substring(option vendor-class-identifier, 0, 9) = "PXEClient";
+        next-server 192.168.0.10;
+        filename "pxelinux.0";
+}
+
+#Windows 클라이언트 클래스 설정
+class "ms-clients" {
+        match if substring (option vendor-class-identifier, 0, 4) = "MSFT";
+}
+
+# DHCP 서버가 돌고 있는 리눅스 머신 클래스 설정
+class "linux-dhcp" {
+        match if substring (option vendor-class-identifier, 0, 5) = "Linux";
+}
+
+subnet 192.168.0.0 netmask 255.255.255.0 {
+       # option routers  GATEWAY주소;
+        option routers 192.168.0.1;
+        #option broadcast-address 브로드캐스트 주소;
+        option broadcast-address 192.168.0.255;
+        pool {
+                deny members of "ms-clients";
+                deny members of "linux-dhcp";
+                allow members of "pxeclients";
+                range dynamic-bootp 192.168.0.11   192.168.0.254;
+        }
+}
+
+
+4. NFS 설치 및 설정
+[root@localhost /]# yum install -y nfs-utils
+   ; CentOS 최신버전 다운로드 및 mount
+[root@localhost /]# mkdir -p /home/centos/iso && cd  /home/centos/iso
+[root@localhost /]# wget ftp://centos.mirror.cdnetworks.com/centos/6.7/isos/x86_64/CentOS-6.7-x86_64-bin-DVD1.iso
+[root@localhost /]# mkdir /home/centos/tmp
+[root@localhost /]# mount -t iso9660 -o loop /home/centos/iso/CentOS-6.7-x86_64-bin-DVD1.iso /home/centos/tmp
+[root@localhost /]# mkdir /home/centos/6.7
+[root@localhost /]# cp -R /home/centos/tmp/*  /home/centos/6.7
+[root@localhost /]# umount /home/centos/tmp
+[root@localhost /]# cd  /home/centos/iso
+[root@localhost /]# wget ftp://centos.mirror.cdnetworks.com/centos/7.2.1511/isos/x86_64/CentOS-7-x86_64-DVD-1511.iso
+[root@localhost /]# mount -t iso9660 -o loop /home/centos/iso/CentOS-7-x86_64-DVD-1511.iso /home/centos/tmp
+[root@localhost /]# mkdir /home/centos/7.2
+[root@localhost /]# cp -R /home/centos/tmp/*  /home/centos/7.2
+[root@localhost /]# umount /home/centos/tmp
+
+
+
+[root@localhost /]# vi /etc/exports
+/home/centos/7.2  *(ro)
+/home/centos/6.7  *(ro)
+/tftpboot  *(ro)
+[root@localhost /]# exportfs -a
+
+
+5. PXE 환경설정 및 부팅이미지 복사
+[root@localhost /]# cd /tftpboot
+[root@localhost /]# mkdir centos6.7  centos7.2   ks   pxelinux.cfg
+[root@localhost /]# cp /usr/share/syslinux/pxelinux.0 /tftpboot/
+[root@localhost /]# cp /usr/share/syslinux/menu.c32 /tftpboot/
+[root@localhost /]# cp /home/centos/6.7/images/pxeboot/vmlinuz   /tftpboot/centos6.7/
+[root@localhost /]# cp /home/centos/6.7/images/pxeboot/initrd.img  /tftpboot/centos6.7/
+[root@localhost /]# cp /home/centos/7.2/images/pxeboot/vmlinuz /tftpboot/centos7.2/
+[root@localhost /]# cp /home/centos/7.2/images/pxeboot/initrd.img /tftpboot/centos7.2/
+[root@localhost /]# vi /tftpboot/pxelinux.cfg/default
+default menu.c32
+timeout 100
+menu background splash.jpg
+menu color border 0 #ffffffff #00000000
+menu color sel 7 #ffffffff #ff000000
+menu color title 0 #ffffffff #00000000
+menu color tabmsg 0 #ffffffff #00000000
+menu color unsel 0 #ffffffff #00000000
+menu color hotsel 0 #ff000000 #ffffffff
+menu color hotkey 7 #ffffffff #ff000000
+menu color timeout_msg 0 #ffffffff #00000000
+menu color timeout 0 #ffffffff #00000000
+menu color cmdline 0 #ffffffff #00000000
+menu tabmsg Press ENTER to Install or TAB to edit a menu entry
+ 
+  
+menu title ####  OS Installer Boot Menu  ####
+label 1 
+  menu label CentOS6.7(64bit) on R210
+  kernel centos/x86/vmlinuz
+  append ksdevice=eth0 initrd=centos6.7/initrd.img network ks=nfs:192.168.0.10:/tftpboot/ks/ks67.cfg text
+label 2
+  menu label CentOS7.2(64bit) on R210
+  kernel centos/x64/vmlinuz
+  append ksdevice=eth0 initrd=centos7.2/initrd.img network ks=nfs:192.168.0.10:/tftpboot/ks/ks72.cfg text
+
+
+6. kickstart 설정
+[root@localhost /]# vi /tftpboot/ks/ks67.cfg  or  /tftpboot/ks/ks72.cfg
+#install 또는 upgrade
+install
+# 설치 모드 지정 (이 옵션이 없으면 그래픽 모드로 설치가 진행 됩니다.)
+text 
+# 미러링 서버 지정
+# 예) url --url http://centos.mirror.cdnetworks.com/centos/5.4/os/i386
+# 예) nfs --server=192.168.0.1 --dir=/mnt/md0
+nfs --server=192.168.0.10 --dir=/home/centos/6.7  or  /home/centos/7.2
+# 언어선택으로 기본설정 사용. 
+# langsupport 에 ko_KR.UTF-8 를 추가해주면 한국어 지원. 
+# 예) langsupport --default=en_US.UTF-8 en_US.UTF-8 ko_KR.UTF-8 
+lang en_US.UTF-8
+langsupport --default=en_US.UTF-8 en_US.UTF-8 ko_KR.UTF-8 
+# 키보드 설정 
+keyboard us
+# 마우스 설정
+mouse none
+# 네트웍 설정
+# dhcp 로 ip를 가져오지 못하면 고정 ip 설정화면이 나옵니다.
+# 아래 주석은 여러가지 형태의 네트웍 설정방법을 예로 보여준 것 입니다. 
+#network --bootproto dhcp 
+#network --bootproto static  
+network --device eth0 --bootproto dhcp 
+#network --device eth0 --bootproto static --ip 192.168.0.251 --netmask 255.255.255.0 --gateway 192.168.0.1 --nameserver 168.126.63.1 --hostname sunxxx
+# root 패스워드 입니다. 원하시는걸로 바꾸시면됩니다. 
+rootpw  1234567890
+# firewall 설정 단계로 개인적으로 os 설치완료후 설정할 것을 권장합니다. 
+firewall --disabled 
+# selinux 설정 단계로 완벽하게 이해 하지 못한다면 disabled 하는것을 권장합니다. 
+selinux --disabled 
+# 시스템에서 사용될 인증 옵션을 설정합니다. 기본값 사용 
+authconfig --enableshadow --enablemd5
+# timezone 설정
+timezone --utc Asia/Seoul
+# 부트로더 설정 
+bootloader --location=mbr --driveorder=sda --append="rhgb quiet"
+# 시스템에 있는 모든 파티션을 삭제 합니다. 
+clearpart --initlabel --all
+# 파티션을 나눕니다.
+part / --fstype ext3 --size=10240  ---ndisk=sda 
+part swap --size=8192 ---ndisk=sda 
+part /tmp --fstype ext3 --size=4096 ---ndisk=sda
+part /var --fstype ext3 --size=10240 ---ndisk=sda
+part /usr --fstype ext3 --size=20720 ---ndisk=sda
+part /home --fstype ext3 --size=1 --grow ---ndisk=sda
+#reboot
+# 패키지를 선택합니다. (나머지는 설치 완료 후 yum 으로 설치)
+%packages
+@development-tools
+
+# 설치 후 실행할 쉘스크립트
+%post
+#wget -q -O - http://linux.dell.com/repo/hardware/latest/bootstrap.cgi | bash
+#yum install -y srvadmin-all
+#cp /etc/modprobe.conf /etc/modprobe.conf.bak
+#echo "options bnx2 disable_msi=1" >> /etc/modprobe.conf
+
+
+7. 서비스 시작(순서대로!!)
+[root@localhost /]# service xinetd start
+[root@localhost /]# service dhcpd start
+[root@localhost /]# service portmap start
+[root@localhost /]# service nfs start
+
