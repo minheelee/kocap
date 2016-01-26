@@ -51,6 +51,17 @@ https://docs.docker.com/engine/userguide/networking/get-started-overlay/
 # 사전 작업
 # 1. CentOS7에서 kernel을 3.18로 업그레이드
 
+systemctl list-unit-files | grep fire
+systemctl list-unit-files | grep iptables
+
+systemctl stop firewalld
+systemctl stop iptables
+systemctl stop ip6tables
+
+systemctl disable firewalld
+systemctl disable iptables
+systemctl disable ip6tables
+
 wget http://mirrors.neterra.net/elrepo/kernel/el7/x86_64/RPMS/kernel-ml-3.18.6-1.el7.elrepo.x86_64.rpm
 wget http://mirrors.neterra.net/elrepo/kernel/el7/x86_64/RPMS/kernel-ml-devel-3.18.6-1.el7.elrepo.x86_64.rpm
 
@@ -85,6 +96,7 @@ yum update
 reboot
 
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+yum install gcc 
 yum install VirtualBox-5.0
 
 export KERN_DIR=/usr/src/kernels/3.18.6-1.el7.elrepo.x86_64/
