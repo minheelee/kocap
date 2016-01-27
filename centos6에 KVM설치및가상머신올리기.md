@@ -11,8 +11,10 @@ reboot
 
 ###  KVM RPMs/packages 설치 
 ```
-yum groupinstall -y "Virtualisation Tools" "Virtualization Platform"
-yum install -y python-virtinst wget
+rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+yum groupinstall -y "Virtualisation Tools" "Virtualization Platform" "development tools"
+yum install -y libguestfs-tools python-virtinst kvm  python-pip wget libxml2 libxml2-devel libxslt-devel python-devel
+pip install lxml 
 ``` 
 
 ###  libvirtd service 등록
@@ -56,10 +58,59 @@ service network restart
 ```
 
 - network bridge 확인
-
 ```
 brctl show
 ip addr show br1
 ip route
 ping cyberciti.biz
 ```
+centos6.7_default
+
+- https://www.youtube.com/watch?v=nVvHCb-ixF4 
+
+virt-install --name=node01 \
+   --disk path=/home/kvm/images/node01.img,size=10 \
+   --ram=1024 \
+   --vcpus=1 \
+   --os-type=linux \
+   --os-variant=rhel6 \
+   --network bridge:br1  \
+   --nographics  \
+   --cdrom=/home/kvm/CentOS-6.7-x86_64-minimal.iso   
+
+   --description "CentOS6.7 minimal VM" \    
+   --cpu host \
+
+- VM 삭제하기 
+```
+VM_NAME=node01
+virsh shutdown $VM_NAME
+virsh destroy $VM_NAME
+virsh undefine $VM_NAME
+rm -f /home/kvm/images/${VM_NAME}.img
+```
+
+### VM 동적 생성
+- http://www.greenhills.co.uk/2013/03/24/cloning-vms-with-kvm.html
+
+
+mkdir -p tmp
+virsh dumpxml centos6.7_default > tmp/centos6.7_default.xml
+mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac
+python ./modify-domain.py \
+    --name $VM \
+    --new-uuid \
+    --device-path=/home/kvm/images/vms-$VM \
+    --mac-address $mac \
+    < tmp/centos6.7_default.xml > tmp/$VM.xml
+virsh define tmp/$VM.xml
+virsh dumpxml $VM
+
+
+
+
+yum install -y bind-utils
+yum install -y vim
+yum install -y ntsysv
+yum install -y system-config-firewall-tui
+yum install -y system-config-network
