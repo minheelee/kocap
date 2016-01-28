@@ -3,6 +3,11 @@
 - 출처 : http://www.cyberciti.biz/faq/kvm-virtualization-in-redhat-centos-scientific-linux-6/
 
 ## 1. HOST 서버 준비
+
+###  CentOS 설치
+- centos6.7 최소설치판으로 설치함.
+- 설치시후에 아래와 같이 selinux 을 disabled 함.
+
 ```
 vi /etc/selinux/config
 SELINUX=disabled
@@ -64,9 +69,9 @@ ip addr show br1
 ip route
 ping cyberciti.biz
 ```
-centos6.7_default
 
-- https://www.youtube.com/watch?v=nVvHCb-ixF4 
+- centos6.7_default 디폴트 이미지 만들기
+- 터미널에서 명령어로만으로 잘 만들어지지 않아서 KVM UI 프로그램으로 만듬.
 
 virt-install --name=node01 \
    --disk path=/home/kvm/images/node01.img,size=10 \
@@ -105,12 +110,50 @@ yum install -y system-config-firewall-tui
 yum install -y system-config-network
 ``` 
 
+- KVM 용 디렉토리 만들기
+```
+mkdir -p /home/kvm/images
+cd /home/kvm/
+```
+
+- IP 및 MAC 주소 만들기
+- vi generate-ips.py  파일에 아래 내용 넣기
+```
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# generate vm network range
+
+import virtinst.util
+for num in range(110, 130+1):
+    print("vm{0}\t192.168.0.{0}\t{1}".format(num, virtinst.util.randomMAC()))
+```
+
+- python generate-ips.py  > ips.txt
+
+- vi generate-openwrt.py 파일에 아래 내용 넣기 
+```
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# generate openwrt /etc/config/dhcp config
+
+import sys
+for line in sys.stdin:
+    (ip, name, mac) = line.split()
+    print("config domain\n\toption name '{0}'\n\toption ip '{1}'\n\n".format(name, ip))
+    print("config host\n\toption mac '{0}'\n\toption name '{1}'\n\toption ip '{2}'\n\n".format(mac, name, ip))
+```
+
+- python generate-openwrt.py < ips.txt
+
+
 - 미리 만들어 놓은 CentOS 이미지명  : /home/kvm/images/centos6.7_default 
 - VM을 동적으로 생성하는 스크립트
-
+- vi clone-vm.sh 아래 내용 추가
 ```
+VM=$1
 VM_IMAGE_DIR=/home/kvm/images
-VM=vm111
 WORK_DIR=/home/kvm/working/${VM}
 
 cp ${VM_IMAGE_DIR}/centos6.7_default  ${VM_IMAGE_DIR}/vm-${VM}
