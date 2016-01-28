@@ -94,23 +94,90 @@ rm -f /home/kvm/images/${VM_NAME}.img
 - http://www.greenhills.co.uk/2013/03/24/cloning-vms-with-kvm.html
 
 
-mkdir -p tmp
-virsh dumpxml centos6.7_default > tmp/centos6.7_default.xml
-mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac
-python ./modify-domain.py \
-    --name $VM \
-    --new-uuid \
-    --device-path=/home/kvm/images/vms-$VM \
-    --mac-address $mac \
-    < tmp/centos6.7_default.xml > tmp/$VM.xml
-virsh define tmp/$VM.xml
-virsh dumpxml $VM
-
-
-
-
+- KVM에서 최소설치 버전으로 centos6.7 VM을 만들어서 미리 이미지를 만들어 놓음
+   - 터미널에서 명령어로만으로 잘 만들어지지 않아서 KVM UI 프로그램으로 만듬.
+   - 네트워크는 자동연결로 설정함. 
+```
 yum install -y bind-utils
 yum install -y vim
 yum install -y ntsysv
 yum install -y system-config-firewall-tui
 yum install -y system-config-network
+``` 
+
+- 미리 만들어 놓은 CentOS 이미지명  : /home/kvm/images/centos6.7_default 
+
+```
+VM_IMAGE_DIR=/home/kvm/images
+VM=vm111
+WORK_DIR=/home/kvm/working/${VM}
+
+cp ${VM_IMAGE_DIR}/centos6.7_default  ${VM_IMAGE_DIR}/vm-${VM}
+
+mkdir -p ${WORK_DIR}/tmp
+virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml
+mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac   # 스크립트 시작시 입력 변수 또는 DB 또는 random하게 mac 값을 가지고 오도록 수정 필요함. 
+python ./modify-domain.py \
+    --name $VM \
+    --new-uuid \
+    --device-path=${VM_IMAGE_DIR}/vm-${VM} \
+    --mac-address $mac \
+    < ${WORK_DIR}/tmp/centos6.7_default.xml > ${WORK_DIR}/tmp/$VM.xml
+virsh define ${WORK_DIR}/tmp/$VM.xml
+virsh dumpxml $VM
+
+
+mkdir -p ${WORK_DIR}/templates
+cat > ${WORK_DIR}/templates/network-interfaces <<NET
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR=IP_ADDRESS_GOES_HERE
+GATEWAY=192.168.0.1
+NETMASK=255.255.255.0
+DNS1=8.8.8.8
+DNS2=8.8.4.4
+NET
+
+
+cat > ${WORK_DIR}/templates/hosts <<HOSTS
+127.0.0.1   localhost
+IP_ADDRESS_GOES_HERE   VM_NAME_GOES_HERE
+HOSTS
+
+
+cat > ${WORK_DIR}/templates/configure.sh <<SCRIPT
+#!/bin/bash
+# Run in the host, with the cwd being the root of the guest
+
+set -x
+cp ${WORK_DIR}/tmp/network_interfaces.VM_NAME_GOES_HERE etc/network/interfaces
+cp ${WORK_DIR}/tmp/hosts.VM_NAME_GOES_HERE etc/hosts
+
+# re-generate the keys. Letting virt-sysprep remove the keys
+# is insufficient, and they don't get automatically regenerated
+# on boot by Ubuntu. A dpkg-reconfigure fails for some reason,
+# and doing a boot-time script is overkill, so just do it now explicitly.
+# 아래 코드는 Centos에 맞게 수정 필요함.
+rm etc/ssh/ssh_host_rsa_key etc/ssh/ssh_host_rsa_key.pub
+rm etc/ssh/ssh_host_dsa_key etc/ssh/ssh_host_dsa_key.pub
+rm etc/ssh/ssh_host_ecdsa_key etc/ssh/ssh_host_ecdsa_key.pub
+ssh-keygen -h -N '' -t rsa -f etc/ssh/ssh_host_rsa_key
+ssh-keygen -h -N '' -t dsa -f etc/ssh/ssh_host_dsa_key
+ssh-keygen -h -N '' -t ecdsa -f etc/ssh/ssh_host_ecdsa_key
+SCRIPT
+
+
+ip=`egrep "^$VM\s" ips.txt | awk '{print $2}'`; echo $ip   # DB 또는 스크립트시 시작시 입력 변수로 받도록  수정 필요함. 
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/hosts > tmp/hosts.$VM
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/network-interfaces > tmp/network-interfaces.$VM
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/configure.sh > tmp/configure.sh.$VM
+chmod a+x ${WORK_DIR}/tmp/configure.sh.$VM
+virt-sysprep -d $VM \
+  --verbose \
+  --enable udev-persistent-net,bash-history,hostname,logfiles,utmp,script \
+  --hostname $VM \
+  --script ${WORK_DIR}/tmp/configure.sh.$VM
+
+virsh start $VM
+
+```
