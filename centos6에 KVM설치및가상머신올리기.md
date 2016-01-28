@@ -106,6 +106,7 @@ yum install -y system-config-network
 ``` 
 
 - 미리 만들어 놓은 CentOS 이미지명  : /home/kvm/images/centos6.7_default 
+- VM을 동적으로 생성하는 스크립트
 
 ```
 VM_IMAGE_DIR=/home/kvm/images
@@ -114,7 +115,7 @@ WORK_DIR=/home/kvm/working/${VM}
 
 cp ${VM_IMAGE_DIR}/centos6.7_default  ${VM_IMAGE_DIR}/vm-${VM}
 
-mkdir -p ${WORK_DIR}/tmp
+rm -rf ${WORK_DIR}/tmp && mkdir -p ${WORK_DIR}/tmp
 virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml
 mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac   # 스크립트 시작시 입력 변수 또는 DB 또는 random하게 mac 값을 가지고 오도록 수정 필요함. 
 python ./modify-domain.py \
@@ -124,14 +125,16 @@ python ./modify-domain.py \
     --mac-address $mac \
     < ${WORK_DIR}/tmp/centos6.7_default.xml > ${WORK_DIR}/tmp/$VM.xml
 virsh define ${WORK_DIR}/tmp/$VM.xml
-virsh dumpxml $VM
+virsh dumpxml $VM # 확인용  없어도 됨.
 
 
 mkdir -p ${WORK_DIR}/templates
 cat > ${WORK_DIR}/templates/network-interfaces <<NET
+DEVICE=eth0
 BOOTPROTO=static
 ONBOOT=yes
 IPADDR=IP_ADDRESS_GOES_HERE
+HWADDR=MAC_GOES_HERE
 GATEWAY=192.168.0.1
 NETMASK=255.255.255.0
 DNS1=8.8.8.8
@@ -150,7 +153,7 @@ cat > ${WORK_DIR}/templates/configure.sh <<SCRIPT
 # Run in the host, with the cwd being the root of the guest
 
 set -x
-cp ${WORK_DIR}/tmp/network_interfaces.VM_NAME_GOES_HERE etc/network/interfaces
+cp ${WORK_DIR}/tmp/network-interfaces.VM_NAME_GOES_HERE etc/sysconfig/network-scripts/ifcfg-eth0
 cp ${WORK_DIR}/tmp/hosts.VM_NAME_GOES_HERE etc/hosts
 
 # re-generate the keys. Letting virt-sysprep remove the keys
@@ -168,9 +171,10 @@ SCRIPT
 
 
 ip=`egrep "^$VM\s" ips.txt | awk '{print $2}'`; echo $ip   # DB 또는 스크립트시 시작시 입력 변수로 받도록  수정 필요함. 
-sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/hosts > tmp/hosts.$VM
-sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/network-interfaces > tmp/network-interfaces.$VM
-sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < templates/configure.sh > tmp/configure.sh.$VM
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < ${WORK_DIR}/templates/hosts > ${WORK_DIR}/tmp/hosts.$VM
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" -e "s/MAC_GOES_HERE/$mac/g"  < ${WORK_DIR}/templates/network-interfaces > ${WORK_DIR}/tmp/network-interfaces.$VM
+
+sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < ${WORK_DIR}/templates/configure.sh > ${WORK_DIR}/tmp/configure.sh.$VM
 chmod a+x ${WORK_DIR}/tmp/configure.sh.$VM
 virt-sysprep -d $VM \
   --verbose \
