@@ -185,3 +185,15 @@ virt-sysprep -d $VM \
 virsh start $VM
 
 ```
+
+- VM ªË¡¶
+
+```
+VM_IMAGE_DIR=/home/kvm/images
+VM=vm111
+
+virsh shutdown $VM
+virsh destroy $VM
+virsh undefine $VM
+rm -f ${VM_IMAGE_DIR}/vm-${VM}
+```
