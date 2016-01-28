@@ -22,3 +22,24 @@ cd ssh2-0.12
 phpize
 ./configure
 make && make install
+
+
+## 2. 사용법
+svn co  svn://112.172.129.142/NGT/BigData/Sources/HadoopMonitoring/installer  --username  ID  --password 비번
+cd installer 
+
+rm -f fbpsetup.db
+cp hadoop_nodes.txt hosts.txt
+vi hosts.txt  # 하둡을 설치할 host들의 이름들을 기입
+
+vi /etc/hosts # IP  hostname을 등록함. DNS 등록되어 있으면 생략함.
+
+./fbp_install.sh  # 시작함. 
+
+
+
+
+
+
+
+
