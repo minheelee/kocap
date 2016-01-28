@@ -1,12 +1,12 @@
 
-# CentOS6¿¡¼­ KVM ¼³Ä¡ ¹× °¡»ó¸Ó½Å ¿Ã¸®±â
-- ÃâÃ³ : http://www.cyberciti.biz/faq/kvm-virtualization-in-redhat-centos-scientific-linux-6/
+# CentOS6ì—ì„œ KVM ì„¤ì¹˜ ë° ê°€ìƒë¨¸ì‹  ì˜¬ë¦¬ê¸°
+- ì¶œì²˜  : http://www.cyberciti.biz/faq/kvm-virtualization-in-redhat-centos-scientific-linux-6/
 
-## 1. HOST ¼­¹ö ÁØºñ
+## 1. HOST ì„œë²„ ì¤€ë¹„
 
-###  CentOS ¼³Ä¡
-- centos6.7 ÃÖ¼Ò¼³Ä¡ÆÇÀ¸·Î ¼³Ä¡ÇÔ.
-- ¼³Ä¡½ÃÈÄ¿¡ ¾Æ·¡¿Í °°ÀÌ selinux À» disabled ÇÔ.
+###  CentOS ì„¤ì¹˜
+- centos6.7 ìµœì†Œì„¤ì¹˜íŒìœ¼ë¡œ ì„¤ì¹˜í•¨.
+- ì„¤ì¹˜ì‹œí›„ì— ì•„ë˜ì™€ ê°™ì´ selinux ì„ disabled í•¨.
 
 ```
 vi /etc/selinux/config
@@ -14,7 +14,7 @@ SELINUX=disabled
 reboot
 ```
 
-###  KVM RPMs/packages ¼³Ä¡ 
+###  KVM RPMs/packages ì„¤ì¹˜
 ```
 rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 yum groupinstall -y "Virtualisation Tools" "Virtualization Platform" "development tools"
@@ -22,15 +22,15 @@ yum install -y libguestfs-tools python-virtinst kvm  python-pip wget libxml2 lib
 pip install lxml 
 ``` 
 
-###  libvirtd service µî·Ï
+###  libvirtd service ë“±ë¡
 ```
 chkconfig libvirtd on
 service libvirtd start
 ```
 
-### network bridge ¼³Á¤
+### network bridge ì„¤ì •
 ```
-vi /etc/sysconfig/network  # ¾Æ·¡¿Í °°ÀÌ ¼öÁ¤ 
+vi /etc/sysconfig/network  # ì•„ë˜ì™€ ê°™ì´ ìˆ˜ì • 
 NETWORKING=yes
 HOSTNAME=myhostname
 ## I am routing internet traffic via br1 ##
@@ -38,11 +38,11 @@ GATEWAYDEV=br1
 ```
 
 ```
-vi /etc/sysconfig/network-scripts/ifcfg-eth1   # WAN/Internet ¿ë interface
+vi /etc/sysconfig/network-scripts/ifcfg-eth1   # WAN/Internet ï¿½ï¿½ interface
 DEVICE=eth1
 ONBOOT=yes
 HWADDR=00:30:48:C6:0A:D9
-BRIDGE=br1    # <-- ÀÌ°ÍÀÌ Áß¿äÇÔ.
+BRIDGE=br1      # <-- ì´ê²ƒì´ ì¤‘ìš”í•¨.
 ```
 
 ```
@@ -62,7 +62,7 @@ DELAY=0
 service network restart
 ```
 
-- network bridge È®ÀÎ
+- network bridge í™•ì¸
 ```
 brctl show
 ip addr show br1
@@ -70,8 +70,8 @@ ip route
 ping cyberciti.biz
 ```
 
-- centos6.7_default µğÆúÆ® ÀÌ¹ÌÁö ¸¸µé±â
-- ÅÍ¹Ì³Î¿¡¼­ ¸í·É¾î·Î¸¸À¸·Î Àß ¸¸µé¾îÁöÁö ¾Ê¾Æ¼­ KVM UI ÇÁ·Î±×·¥À¸·Î ¸¸µë.
+- centos6.7_default ë””í´íŠ¸ ì´ë¯¸ì§€ ë§Œë“¤ê¸°
+- í„°ë¯¸ë„ì—ì„œ ëª…ë ¹ì–´ë¡œë§Œìœ¼ë¡œ ì˜ ë§Œë“¤ì–´ì§€ì§€ ì•Šì•„ì„œ KVM UI í”„ë¡œê·¸ë¨ìœ¼ë¡œ ë§Œë“¬.
 
 virt-install --name=node01 \
    --disk path=/home/kvm/images/node01.img,size=10 \
@@ -85,7 +85,7 @@ virt-install --name=node01 \
 
 
 
-- VM »èÁ¦ÇÏ±â 
+- VM ì‚­ì œí•˜ê¸°
 ```
 VM_NAME=node01
 virsh shutdown $VM_NAME
@@ -94,13 +94,13 @@ virsh undefine $VM_NAME
 rm -f /home/kvm/images/${VM_NAME}.img
 ```
 
-## 2. KVM °Ô½ºÆ®( VM ) µ¿Àû »ı¼º
+## 2. KVM ê²ŒìŠ¤íŠ¸( VM ) ë™ì  ìƒì„±
 - http://www.greenhills.co.uk/2013/03/24/cloning-vms-with-kvm.html
 
 
-- KVM¿¡¼­ ÃÖ¼Ò¼³Ä¡ ¹öÀüÀ¸·Î centos6.7 VMÀ» ¸¸µé¾î¼­ ¹Ì¸® ÀÌ¹ÌÁö¸¦ ¸¸µé¾î ³õÀ½
-   - ÅÍ¹Ì³Î¿¡¼­ ¸í·É¾î·Î¸¸À¸·Î Àß ¸¸µé¾îÁöÁö ¾Ê¾Æ¼­ KVM UI ÇÁ·Î±×·¥À¸·Î ¸¸µë.
-   - ³×Æ®¿öÅ©´Â ÀÚµ¿¿¬°á·Î ¼³Á¤ÇÔ. 
+- KVMì—ì„œ ìµœì†Œì„¤ì¹˜ ë²„ì „ìœ¼ë¡œ centos6.7 VMì„ ë§Œë“¤ì–´ì„œ ë¯¸ë¦¬ ì´ë¯¸ì§€ë¥¼ ë§Œë“¤ì–´ ë†“ìŒ
+   - í„°ë¯¸ë„ì—ì„œ ëª…ë ¹ì–´ë¡œë§Œìœ¼ë¡œ ì˜ ë§Œë“¤ì–´ì§€ì§€ ì•Šì•„ì„œ KVM UI í”„ë¡œê·¸ë¨ìœ¼ë¡œ ë§Œë“¬.
+   - ë„¤íŠ¸ì›Œí¬ëŠ” ìë™ì—°ê²°ë¡œ ì„¤ì •í•¨.
 ```
 yum install -y bind-utils
 yum install -y vim
@@ -109,14 +109,14 @@ yum install -y system-config-firewall-tui
 yum install -y system-config-network
 ``` 
 
-- KVM ¿ë µğ·ºÅä¸® ¸¸µé±â
+- KVM ìš© ë””ë ‰í† ë¦¬ ë§Œë“¤ê¸°
 ```
 mkdir -p /home/kvm/images
 cd /home/kvm/
 ```
 
-- IP ¹× MAC ÁÖ¼Ò ¸¸µé±â
-- vi generate-ips.py  ÆÄÀÏ¿¡ ¾Æ·¡ ³»¿ë ³Ö±â
+- IP ë° MAC ì£¼ì†Œ ë§Œë“¤ê¸°
+- vi generate-ips.py íŒŒì¼ì— ì•„ë˜ ë‚´ìš© ë„£ê¸°
 ```
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -130,7 +130,7 @@ for num in range(110, 130+1):
 
 - python generate-ips.py  > ips.txt
 
-- vi generate-openwrt.py ÆÄÀÏ¿¡ ¾Æ·¡ ³»¿ë ³Ö±â 
+- vi generate-openwrt.py íŒŒì¼ì— ì•„ë˜ ë‚´ìš© ë„£ê¸°
 ```
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -146,7 +146,7 @@ for line in sys.stdin:
 
 - python generate-openwrt.py < ips.txt
 
-- vi modify-domain.py ÆÄÀÏ¿¡ ¾Æ·¡ ³»¿ë ³Ö±â
+- vi modify-domain.py íŒŒì¼ì— ì•„ë˜ ë‚´ìš© ë„£ê¸°
 ```
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
@@ -198,15 +198,15 @@ print(etree.tostring(tree, pretty_print=True))
 ```
 
 
-- ¹Ì¸® ¸¸µé¾î ³õÀº CentOS ÀÌ¹ÌÁö¸í  : /home/kvm/images/centos6.7_default 
-- VM dump XML ÆÄÀÏ ¸¸µé±â
+- ë¯¸ë¦¬ ë§Œë“¤ì–´ ë†“ì€ CentOS ì´ë¯¸ì§€ëª… : /home/kvm/images/centos6.7_default
+- VM dump XML íŒŒì¼ ë§Œë“¤ê¸°
 ```
 virsh dumpxml centos6.7_default > /home/kvm/images/centos6.7_default.xml
 ```
 
 
-- VMÀ» µ¿ÀûÀ¸·Î »ı¼ºÇÏ´Â ½ºÅ©¸³Æ®
-- vi clone-vm.sh ¾Æ·¡ ³»¿ë Ãß°¡
+- VMì„ ë™ì ìœ¼ë¡œ ìƒì„±í•˜ëŠ” ìŠ¤í¬ë¦½íŠ¸
+- vi clone-vm.sh ì•„ë˜ ë‚´ìš© ì¶”ê°€
 ```
 VM=$1
 VM_IMAGE_DIR=/home/kvm/images
@@ -215,9 +215,9 @@ WORK_DIR=/home/kvm/working/${VM}
 cp ${VM_IMAGE_DIR}/centos6.7_default  ${VM_IMAGE_DIR}/vm-${VM}
 
 rm -rf ${WORK_DIR}/tmp && mkdir -p ${WORK_DIR}/tmp
-# virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml        # kvm¿¡ centos6.7_default VMÀÌ µî·ÏµÇ¾î ÀÖÀ»¶§ 
-cp ${VM_IMAGE_DIR}/centos6.7_default.xml ${WORK_DIR}/tmp/centos6.7_default.xml   # vm ÀÌ¹ÌÁö¿¡¼­ ¹Ì¸® dumpxml ÆÄÀÏÀ» ¸¸µé¾î ³õ¾ÒÀ»¶§ 
-mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac   # ½ºÅ©¸³Æ® ½ÃÀÛ½Ã ÀÔ·Â º¯¼ö ¶Ç´Â DB ¶Ç´Â randomÇÏ°Ô mac °ªÀ» °¡Áö°í ¿Àµµ·Ï ¼öÁ¤ ÇÊ¿äÇÔ. 
+# virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml        # kvmì— centos6.7_default VMì´ ë“±ë¡ë˜ì–´ ìˆì„ë•Œ 
+cp ${VM_IMAGE_DIR}/centos6.7_default.xml ${WORK_DIR}/tmp/centos6.7_default.xml   # vm ì´ë¯¸ì§€ì—ì„œ ë¯¸ë¦¬ dumpxml íŒŒì¼ì„ ë§Œë“¤ì–´ ë†“ì•˜ì„ë•Œ 
+mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac   # ìŠ¤í¬ë¦½íŠ¸ ì‹œì‘ì‹œ ì…ë ¥ ë³€ìˆ˜ ë˜ëŠ” DB ë˜ëŠ” randomí•˜ê²Œ mac ê°’ì„ ê°€ì§€ê³  ì˜¤ë„ë¡ ìˆ˜ì • í•„ìš”í•¨. 
 python ./modify-domain.py \
     --name $VM \
     --new-uuid \
@@ -225,7 +225,7 @@ python ./modify-domain.py \
     --mac-address $mac \
     < ${WORK_DIR}/tmp/centos6.7_default.xml > ${WORK_DIR}/tmp/$VM.xml
 virsh define ${WORK_DIR}/tmp/$VM.xml
-virsh dumpxml $VM # È®ÀÎ¿ë  ¾ø¾îµµ µÊ.
+virsh dumpxml $VM # í™•ì¸ìš©  ì—†ì–´ë„ ë¨.
 
 
 mkdir -p ${WORK_DIR}/templates
@@ -260,7 +260,7 @@ cp ${WORK_DIR}/tmp/hosts.VM_NAME_GOES_HERE etc/hosts
 # is insufficient, and they don't get automatically regenerated
 # on boot by Ubuntu. A dpkg-reconfigure fails for some reason,
 # and doing a boot-time script is overkill, so just do it now explicitly.
-# ¾Æ·¡ ÄÚµå´Â Centos¿¡ ¸Â°Ô ¼öÁ¤ ÇÊ¿äÇÔ.
+# ì•„ë˜ ì½”ë“œëŠ” Centosì— ë§ê²Œ ìˆ˜ì • í•„ìš”í•¨.
 rm etc/ssh/ssh_host_rsa_key etc/ssh/ssh_host_rsa_key.pub
 rm etc/ssh/ssh_host_dsa_key etc/ssh/ssh_host_dsa_key.pub
 rm etc/ssh/ssh_host_ecdsa_key etc/ssh/ssh_host_ecdsa_key.pub
@@ -270,7 +270,7 @@ ssh-keygen -h -N '' -t ecdsa -f etc/ssh/ssh_host_ecdsa_key
 SCRIPT
 
 
-ip=`egrep "^$VM\s" ips.txt | awk '{print $2}'`; echo $ip   # DB ¶Ç´Â ½ºÅ©¸³Æ®½Ã ½ÃÀÛ½Ã ÀÔ·Â º¯¼ö·Î ¹Şµµ·Ï  ¼öÁ¤ ÇÊ¿äÇÔ. 
+ip=`egrep "^$VM\s" ips.txt | awk '{print $2}'`; echo $ip   # DB ë˜ëŠ” ìŠ¤í¬ë¦½íŠ¸ì‹œ ì‹œì‘ì‹œ ì…ë ¥ ë³€ìˆ˜ë¡œ ë°›ë„ë¡  ìˆ˜ì • í•„ìš”í•¨.  
 sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" < ${WORK_DIR}/templates/hosts > ${WORK_DIR}/tmp/hosts.$VM
 sed -e "s/IP_ADDRESS_GOES_HERE/$ip/g" -e "s/VM_NAME_GOES_HERE/$VM/g" -e "s/MAC_GOES_HERE/$mac/g"  < ${WORK_DIR}/templates/network-interfaces > ${WORK_DIR}/tmp/network-interfaces.$VM
 
@@ -286,7 +286,7 @@ virsh start $VM
 
 ```
 
-- VM »èÁ¦
+- VM ì‚­ì œ
 
 ```
 VM_IMAGE_DIR=/home/kvm/images
