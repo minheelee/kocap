@@ -19,5 +19,6 @@ docker-centos-hadoop-cluster
 
 - [Setting up a Docker Bridge](https://www.ibm.com/developerworks/community/blogs/powermeup/entry/Setting_up_a_Docker_Bridge?lang=en)
 
+- http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker/
 
-http://blog.oddbit.com/2014/08/11/four-ways-to-connect-a-docker/
+- [CentOS6에서 KVM 설치 및 가상머신 올리기](https://github.com/minheelee/kocap/blob/master/centos6%EC%97%90%20KVM%EC%84%A4%EC%B9%98%EB%B0%8F%EA%B0%80%EC%83%81%EB%A8%B8%EC%8B%A0%EC%98%AC%EB%A6%AC%EA%B8%B0.md)

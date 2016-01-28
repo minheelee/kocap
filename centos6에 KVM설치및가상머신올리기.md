@@ -83,8 +83,7 @@ virt-install --name=node01 \
    --nographics  \
    --cdrom=/home/kvm/CentOS-6.7-x86_64-minimal.iso   
 
-   --description "CentOS6.7 minimal VM" \    
-   --cpu host \
+
 
 - VM 삭제하기 
 ```
@@ -147,8 +146,65 @@ for line in sys.stdin:
 
 - python generate-openwrt.py < ips.txt
 
+- vi modify-domain.py 파일에 아래 내용 넣기
+```
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# modify-domain.py -- modify a KVM domain
+
+import re, sys, uuid
+from lxml import etree
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("--name")
+parser.add_option("--new-uuid", action="store_true")
+parser.add_option("--device-path")
+parser.add_option("--mac-address")
+(options, args) = parser.parse_args()
+
+tree = etree.parse(sys.stdin)
+
+if options.name:
+    name_el = tree.xpath("/domain/name")[0]
+    name_el.text = options.name
+
+if options.new_uuid:
+    uuid_el = tree.xpath("/domain/uuid")[0]
+    uuid_el.text = str(uuid.uuid1())
+
+if options.device_path is not None:
+    if options.device_path[0] is not '/':
+        sys.exit("device_path is not an absolute path")
+    source_el = tree.xpath("/domain/devices/disk[@device='disk']/source")[0]
+    #source_el.set('dev', options.device_path)
+    source_el.set('file', options.device_path)
+    if re.match('.*\.qcow2$', options.device_path):
+        driver = 'qcow2'
+    else:
+        driver = 'raw'
+    driver_el = tree.xpath("/domain/devices/disk[@device='disk']/driver")[0]
+    driver_el.set('type', driver)
+    
+if options.mac_address is not None:
+    if not re.match("([0-9a-f][0-9a-f]:){5}[0-9a-f][0-9a-f]", options.mac_address):
+        sys.exit("{0} is not a valid MAC address".format(options.mac_address))
+    mac_el = tree.xpath("/domain/devices/interface[@type='bridge']/mac")[0]
+    mac_el.set('address', options.mac_address)
+
+print(etree.tostring(tree, pretty_print=True))
+
+```
+
 
 - 미리 만들어 놓은 CentOS 이미지명  : /home/kvm/images/centos6.7_default 
+- VM dump XML 파일 만들기
+```
+virsh dumpxml centos6.7_default > /home/kvm/images/centos6.7_default.xml
+```
+
+
 - VM을 동적으로 생성하는 스크립트
 - vi clone-vm.sh 아래 내용 추가
 ```
@@ -159,7 +215,8 @@ WORK_DIR=/home/kvm/working/${VM}
 cp ${VM_IMAGE_DIR}/centos6.7_default  ${VM_IMAGE_DIR}/vm-${VM}
 
 rm -rf ${WORK_DIR}/tmp && mkdir -p ${WORK_DIR}/tmp
-virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml
+# virsh dumpxml centos6.7_default > ${WORK_DIR}/tmp/centos6.7_default.xml        # kvm에 centos6.7_default VM이 등록되어 있을때 
+cp ${VM_IMAGE_DIR}/centos6.7_default.xml ${WORK_DIR}/tmp/centos6.7_default.xml   # vm 이미지에서 미리 dumpxml 파일을 만들어 놓았을때 
 mac=`egrep "^$VM"'\s' ips.txt | awk '{print $3}'`; echo $mac   # 스크립트 시작시 입력 변수 또는 DB 또는 random하게 mac 값을 가지고 오도록 수정 필요함. 
 python ./modify-domain.py \
     --name $VM \
