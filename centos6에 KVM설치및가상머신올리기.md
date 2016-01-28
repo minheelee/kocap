@@ -2,7 +2,7 @@
 # CentOS6에서 KVM 설치 및 가상머신 올리기
 - 출처 : http://www.cyberciti.biz/faq/kvm-virtualization-in-redhat-centos-scientific-linux-6/
 
-### 준비
+## 1. HOST 서버 준비
 ```
 vi /etc/selinux/config
 SELINUX=disabled
@@ -90,7 +90,7 @@ virsh undefine $VM_NAME
 rm -f /home/kvm/images/${VM_NAME}.img
 ```
 
-### VM 동적 생성
+## 2. KVM 게스트( VM ) 동적 생성
 - http://www.greenhills.co.uk/2013/03/24/cloning-vms-with-kvm.html
 
 
