@@ -24,6 +24,12 @@ phpize
 make && make install
 
 
+vi /etc/php.ini  # 아래  추가 
+extension=ssh2.so
+
+php -m | grep ssh2 # 확인
+ssh2  
+
 ## 2. 사용법
 svn co  svn://112.172.129.142/NGT/BigData/Sources/HadoopMonitoring/installer  --username  ID  --password 비번
 cd installer 
