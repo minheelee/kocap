@@ -22,6 +22,17 @@ yum install -y libguestfs-tools python-virtinst kvm  python-pip wget libxml2 lib
 pip install lxml 
 ``` 
 
+
+### X Window 설치 - 필요할때 설치하면 됨.
+```
+yum groupinstall -y "X Window System" "Desktop" "Fonts" "Korean Support"
+
+vi /etc/inittab   아래와 같이 수정함.
+id:5:initdefault:
+
+reboot
+```
+
 ###  libvirtd service 등록
 ```
 chkconfig libvirtd on
@@ -102,11 +113,11 @@ rm -f /home/kvm/images/${VM_NAME}.img
    - 터미널에서 명령어로만으로 잘 만들어지지 않아서 KVM UI 프로그램으로 만듬.
    - 네트워크는 자동연결로 설정함.
 ```
-yum install -y bind-utils
-yum install -y vim
-yum install -y ntsysv
-yum install -y system-config-firewall-tui
-yum install -y system-config-network
+yum update -y
+yum install -y bind-utils vim ntsysv  system-config-firewall-tui system-config-network
+yum groupinstall -y "X Window System"  "Fonts"
+yum install -y dejavu-lgc-sans-mono-fonts
+yum install -y glibc  glibc-common glibc-devel glibc-headers
 ``` 
 
 - KVM 용 디렉토리 만들기

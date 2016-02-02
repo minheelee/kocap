@@ -42,10 +42,11 @@ vi /etc/hosts # IP  hostname을 등록함. DNS 등록되어 있으면 생략함.
 
 ./fbp_install.sh  # 시작함. 
 
+root 비번 :Vlffldzm!@#
 
 
-
-
-
-
-
+### 실패시
+```
+userdel -r  fbpuser 
+groupdel fbpgroup
+```
