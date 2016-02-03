@@ -118,6 +118,10 @@ yum install -y bind-utils vim ntsysv  system-config-firewall-tui system-config-n
 yum groupinstall -y "X Window System"  "Fonts"
 yum install -y dejavu-lgc-sans-mono-fonts
 yum install -y glibc  glibc-common glibc-devel glibc-headers
+
+# 방화벽 stop 및 사용하지 않기로 설정함.
+service iptables stop
+chkconfig iptables off
 ``` 
 
 - KVM 용 디렉토리 만들기
