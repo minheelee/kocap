@@ -3,26 +3,36 @@
 
 ## 준비
 - root 권한으로
+- pssh 설치
+```
+cd /usr/local/src
+wget http://parallel-ssh.googlecode.com/files/pssh-2.1.1.tar.gz
+tar xvf pssh-2.1.1.tar.gz
+cd pssh-2.1.1
+wget 'http://peak.telecommunity.com/dist/ez_setup.py'
+python ez_setup.py
+python setup.py install
+```
 
 cat > ~/hosts.txt <<HOSTS
-vm111.kocap.com
-vm112.kocap.com
-vm211.kocap.com
-vm212.kocap.com
+vm111
+vm112
+vm211
+vm212
 HOSTS
 
 cat > ~/all_hosts.txt <<HOSTS
 locahost
-vm111.kocap.com
-vm112.kocap.com
-vm211.kocap.com
-vm212.kocap.com
+vm111
+vm112
+vm211
+vm212
 HOSTS
 
 rm -rf ~/.ssh/
 ssh-keygen
 ssh-copy-id -i ~/.ssh/id_rsa.pub localhost
-ssh-copy-id -i ~/.ssh/id_rsa.pub vm111.kocap.com ~ vm211.kocap.com
+ssh-copy-id -i ~/.ssh/id_rsa.pub vm111 ~ vm211
 
 pscp -h ~/hosts.txt ~/.ssh/authorized_keys  ~/.ssh/ 
 pscp -h ~/hosts.txt ~/.ssh/id_rsa  ~/.ssh/
@@ -37,7 +47,7 @@ pssh -h ~/hosts.txt chkconfig iptables off
 - 출처 : http://bloodguy.tistory.com/954
 - Kerberos는 fault tolerance를 위해 replication을 제공함.
 - master-slave(s)로 구성되며, 평소에는 master에서 다 처리하고 주기적으로 master의 db를 slave(s)에 sync하는 방식으로 유지되다가, master가 죽으면 slave가 처리하는 방식.
-    - 1. 서버는 master(vm111.kocap.com), slave(vm111.kocap.com)로 구성.
+    - 1. 서버는 master(vm111), slave(vm111)로 구성.
     - 2. hostname은 kocap.com이며 realm은 KOCAP.COM
     - 3. centos 기준
 
@@ -54,7 +64,7 @@ pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
 
-
+- vm111에 접속해서 
 vi /etc/krb5.conf
 ```
 [logging]
@@ -72,9 +82,9 @@ vi /etc/krb5.conf
 
 [realms]
  KOCAP.COM = {
-  kdc = vm111.kocap.com:88
-  kdc = vm112.kocap.com:88
-  admin_server = vm111.kocap.com:749
+  kdc = vm111:88
+  kdc = vm112:88
+  admin_server = vm111:749
   default_domain = kocap.com
  }
 
