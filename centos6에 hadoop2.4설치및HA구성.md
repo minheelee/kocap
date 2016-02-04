@@ -156,10 +156,9 @@ scp -r /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1_lib_native vm111:~/
 ssh vm111
 tar  xvf  hadoop-2.4.1.tar.gz
 cp ~/hadoop-2.4.1_lib_native/*  ~/hadoop-2.4.1/lib/native/
-``` 
+ 
 
 vi ~/.bash_profile
-```
 export HADOOP_HOME=/home/fbpuser/hadoop-2.4.1
 export HADOOP_LOG_DIR="${HADOOP_HOME}/logs"
 export HADOOP_MAPRED_HOME=${HADOOP_HOME}
@@ -167,36 +166,32 @@ export HADOOP_COMMON_HOME=${HADOOP_HOME}
 export HADOOP_HDFS_HOME=${HADOOP_HOME}
 export HADOOP_YARN_HOME=${HADOOP_HOME}
 export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
-```
+
+
 source ~/.bash_profile
 
 vi ${HADOOP_HOME}/etc/hadoop/slaves
-```
 vm111
 vm112
 vm211
 vm212
-```
+
 
 vi ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
-```
 # export JAVA_HOME=${JAVA_HOME}
 export JAVA_HOME=/usr/java/latest
-
 export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native
 export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
-```
+
 
 vi ${HADOOP_HOME}/etc/hadoop/yarn-env.sh
-```
 export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_HOME}/lib/native
 export HADOOP_OPTS="-Djava.library.path=$HADOOP_HOME/lib/native"
-```
+
 
 ${HADOOP_HOME}/bin/hadoop checknative  # Check Native
 
 vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
-```
 <configuration>
     <property>
         <name>fs.defaultFS</name>
@@ -207,10 +202,9 @@ vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
         <value>vm111:2181,vm112:2181,vm211:2181</value>
     </property>
 </configuration>
-```
+
 
 vi ${HADOOP_HOME}/etc/hadoop/yarn-site.xml
-```
 <configuration>
     <property>
         <name>yarn.nodemanager.aux-services</name>
@@ -330,12 +324,10 @@ vi ${HADOOP_HOME}/etc/hadoop/yarn-site.xml
         <value>vm112:23141</value>
     </property>
 </configuration>
-```
 
 
 mv ${HADOOP_HOME}/etc/hadoop/mapred-site.xml.template ${HADOOP_HOME}/etc/hadoop/mapred-site.xml
 vi ${HADOOP_HOME}/etc/hadoop/mapred-site.xml
-```
 <configuration>
     <property>
         <name>mapreduce.framework.name</name>
@@ -354,11 +346,9 @@ vi ${HADOOP_HOME}/etc/hadoop/mapred-site.xml
         <final>true</final>
     </property>
 </configuration>
-```
 
 
 vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
-```
 <configuration>
     <property>
         <name>dfs.replication</name>
@@ -444,14 +434,13 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
         <value>true</value>
     </property>
 </configuration>
-```
+
 
 vi ${HADOOP_HOME}/etc/hadoop/journalnodes
-```
 vm111
 vm112
 vm211
-```
+
 
 scp -r ~/.bash_profile  vm112:~/
 scp -r ~/.bash_profile  vm211:~/
@@ -460,7 +449,7 @@ scp -r ~/.bash_profile  vm212:~/
 scp -r ${HADOOP_HOME}  vm112:~/
 scp -r ${HADOOP_HOME}  vm211:~/
 scp -r ${HADOOP_HOME}  vm212:~/
-
+```
 
 ## hadooop 실행
 
