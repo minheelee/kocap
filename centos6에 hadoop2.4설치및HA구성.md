@@ -103,29 +103,27 @@ export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin
 
 ## Zookeeper 설정
 - su fbpuser 으로 사용자 권한으로
+
 ```
 scp /home/kvm/kocap/installer2.4/rpm/zookeeper/zookeeper-3.4.6.tar.gz    vm111:~/
 ssh vm111
 tar  xvf  zookeeper-3.4.6.tar.gz
-```
+
 
 vi ~/.bash_profile
-```
 export ZOOKEEPER_HOME=/home/fbpuser/zookeeper-3.4.6
-```
 source ~/.bash_profile
 
 
 cp ${ZOOKEEPER_HOME}/conf/zoo_sample.cfg    ${ZOOKEEPER_HOME}/conf/zoo.cfg
 vi ${ZOOKEEPER_HOME}/conf/zoo.cfg
-```
 dataDir=/home/fbpuser/data/zookeeper
 server.1=vm111:2888:3888
 server.2=vm112:2888:3888
 server.3=vm211:2888:3888
-```
 
-```
+
+
 mkdir -p /home/fbpuser/data/zookeeper
 echo 1 > /home/fbpuser/data/zookeeper/myid
 
