@@ -124,6 +124,8 @@ server.1=vm111:2888:3888
 server.2=vm112:2888:3888
 server.3=vm211:2888:3888
 ```
+
+```
 mkdir -p /home/fbpuser/data/zookeeper
 echo 1 > /home/fbpuser/data/zookeeper/myid
 
@@ -142,7 +144,7 @@ ssh vm212 "echo 4 > /home/fbpuser/data/zookeeper/myid"
 ${ZOOKEEPER_HOME}/bin/zkServer.sh start
 ssh vm112 "${ZOOKEEPER_HOME}/bin/zkServer.sh start " 
 ssh vm211 "${ZOOKEEPER_HOME}/bin/zkServer.sh start "
-
+```
 
 ## hadooop HA 설정
 - 출처 : http://satis.tistory.com/8
@@ -150,6 +152,7 @@ ssh vm211 "${ZOOKEEPER_HOME}/bin/zkServer.sh start "
 
 
 - su fbpuser 으로 사용자 권한으로
+
 ```
 scp    /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1.tar.gz    vm111:~/
 scp -r /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1_lib_native vm111:~/
@@ -449,6 +452,7 @@ scp -r ~/.bash_profile  vm212:~/
 scp -r ${HADOOP_HOME}  vm112:~/
 scp -r ${HADOOP_HOME}  vm211:~/
 scp -r ${HADOOP_HOME}  vm212:~/
+
 ```
 
 ## hadooop 실행
