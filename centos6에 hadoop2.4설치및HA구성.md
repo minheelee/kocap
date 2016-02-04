@@ -142,7 +142,7 @@ ssh vm211 "${ZOOKEEPER_HOME}/bin/zkServer.sh start "
 
 - su fbpuser 으로 사용자 권한으로
 ```
-scp /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1.tar.gz    vm111:~/
+scp    /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1.tar.gz    vm111:~/
 scp -r /home/kvm/kocap/installer2.4/rpm/hadoop/hadoop-2.4.1_lib_native vm111:~/
 ssh vm111
 tar  xvf  hadoop-2.4.1.tar.gz
