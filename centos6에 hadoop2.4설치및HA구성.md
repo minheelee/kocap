@@ -452,41 +452,70 @@ scp -r ${HADOOP_HOME}  vm212:~/
 
 ```
 
-## hadooop 실행
+## Hadooop 실행
 
 - zookeeper에 HA를 위한 znode를 추가, namenode 서버에서 실행
+```
 $HADOOP_HOME/bin/hdfs zkfc -formatZK
+```
 
 - QJM로 사용할 서버마다 JournalNode 를 실행( vm111, vm112, vm211 )
-${HADOOP_HOME}/sbin/hadoop-daemon.sh start journalnode  
+```
+${HADOOP_HOME}/sbin/hadoop-daemon.sh start journalnode
+```  
 
- - namenode(active namenode)에서 실행
+- namenode(active namenode)에서 실행
+```
 ${HADOOP_HOME}/bin/hdfs namenode -format
+```
 
- - namenode(active namenode)에서 실행
+- namenode(active namenode)에서 실행
+```
 $HADOOP_HOME/sbin/start-all.sh
+```
 
 - namenode(standby  namenode)에서 실행
+```
 $HADOOP_HOME/bin/hdfs namenode -bootstrapStandby
+```
 
 - namenode(standby  namenode)에서 실행
+```
 $HADOOP_HOME/sbin/hadoop-daemon.sh start namenode
+```
  
 - active / standby namenode에 zkfc를 실행
+```
 $HADOOP_HOME/sbin/hadoop-daemon.sh start zkfc
+```
 
 - primary namenode가 active가 아니라 standby일 경우 다음과 같이 명령을 수행해서 active로 바꾼다.
+```
 $HADOOP_HOME/bin/hdfs haadmin -transitionToActive nn1
+```
 
 - standby resourcemanager 실행
+```
 $HADOOP_HOME/sbin/yarn-daemon.sh start resourcemanager
 $HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver
+```
 
 - namenode Active/Standby 확인
+```
 $HADOOP_HOME/bin/hdfs haadmin -getServiceState ( nn1 or nn2 ) 
+```
 
 - ResourceManager Active/Standby 확인
+```
 $HADOOP_HOME/bin/yarn rmadmin -getServiceState (rm1 or rm2)
+```
+
+
+
+
+
+
+
 
 
 ## Kerberos 설정
