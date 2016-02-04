@@ -1,13 +1,45 @@
 
 # CentOS6에 Hadoop2.4설치 및 HA구성
 
+rm -rf ~/.ssh/
+ssh-keygen
+ssh-copy-id -i ~/.ssh/id_rsa.pub localhost
+ssh-copy-id -i ~/.ssh/id_rsa.pub vm111.kocap.com ~ vm211.kocap.com
 
+pscp -h ~/hosts.txt ~/.ssh/authorized_keys  ~/.ssh/ 
+pscp -h ~/hosts.txt ~/.ssh/id_rsa  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/id_rsa.pub  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
 
 pssh -h ~/hosts.txt service iptables stop
 pssh -h ~/hosts.txt chkconfig iptables off
 
 pssh -h ~/all_hosts.txt  groupadd fbpgroup 
 pssh -h ~/all_hosts.txt  adduser -p pagVZlVnu4OOs -g fbpgroup -d /home/fbpuser fbpuser
+
+
+su fbpuser
+cd
+cat > ~/hosts.txt <<HOSTS
+vm111.kocap.com
+vm112.kocap.com
+vm211.kocap.com
+vm212.kocap.com
+HOSTS
+
+rm -rf ~/.ssh/
+ssh-keygen
+ssh-copy-id -i ~/.ssh/id_rsa.pub vm111.kocap.com ~ vm211.kocap.com
+비번 : fbppasswd0
+pscp -h ~/hosts.txt ~/.ssh/authorized_keys  ~/.ssh/ 
+pscp -h ~/hosts.txt ~/.ssh/id_rsa  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/id_rsa.pub  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
+
+## java 설치
+- root 권한으로
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/jdk-7u79-linux-x64.rpm ~/ 
+pssh -h ~/hosts.txt  rpm -Uvh ~/jdk-7u79-linux-x64.rpm  
 
 
 pssh -h ~/hosts.txt "echo 'export JAVA_HOME=/usr/java/latest' >> ~/.bash_profile "
@@ -222,10 +254,6 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
     <property>
         <name>dfs.replication</name>
         <value>3</value>
-    </property>
-    <property>
-        <name>dfs.secondary.http.address</name>
-        <value>vm111:50090</value>
     </property>    
     <property>
         <name>dfs.name.dir</name>
@@ -278,7 +306,7 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
     <!-- Storage for edits' files -->
     <property>
         <name>dfs.namenode.shared.edits.dir</name>
-        <value>qjournal://vm111:8485;vm112:8485/hadoop-cluster</value>
+        <value>qjournal://vm111:8485;vm112:8485;vm211:8485/hadoop-cluster</value>
     </property>
     <property>
         <name>dfs.namenode.max.extra.edits.segments.retained</name>
@@ -360,11 +388,18 @@ $HADOOP_HOME/bin/yarn rmadmin -getServiceState (rm1 or rm2)
     - 2. hostname은 kocap.com이며 realm은 KOCAP.COM
     - 3. centos 기준
 
-rpm -Uvh portreserve-0.0.4-9.el6.x86_64.rpm
-rpm -Uvh words-3.0-17.el6.noarch.rpm
-rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
-rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
-rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
+- root 권한으로
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/portreserve-0.0.4-9.el6.x86_64.rpm  ~/ 
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/words-3.0-17.el6.noarch.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-server-1.10.3-42.el6.x86_64.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-libs-1.10.3-42.el6.x86_64.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-workstation-1.10.3-42.el6.x86_64.rpm  ~/
+
+pssh -h ~/hosts.txt  rpm -Uvh portreserve-0.0.4-9.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh words-3.0-17.el6.noarch.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
 
 
 vi /etc/krb5.conf
@@ -384,9 +419,9 @@ vi /etc/krb5.conf
 
 [realms]
  KOCAP.COM = {
-  kdc = vm111:88
-  kdc = vm112:88
-  admin_server = vm111:749
+  kdc = vm111.kocap.com:88
+  kdc = vm112.kocap.com:88
+  admin_server = vm111.kocap.com:749
   default_domain = kocap.com
  }
 
@@ -413,7 +448,9 @@ vi /var/kerberos/krb5kdc/kdc.conf
 ```
 
 - Database 생성
+```
 kdb5_util create -s
+```
 
 - vi /var/kerberos/krb5kdc/kadm5.acl
 ```

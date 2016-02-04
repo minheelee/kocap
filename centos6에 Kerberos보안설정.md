@@ -1,0 +1,114 @@
+
+# CentOS6에 Kerberos 보안설정
+
+## 준비
+- root 권한으로
+
+cat > ~/hosts.txt <<HOSTS
+vm111.kocap.com
+vm112.kocap.com
+vm211.kocap.com
+vm212.kocap.com
+HOSTS
+
+cat > ~/all_hosts.txt <<HOSTS
+locahost
+vm111.kocap.com
+vm112.kocap.com
+vm211.kocap.com
+vm212.kocap.com
+HOSTS
+
+rm -rf ~/.ssh/
+ssh-keygen
+ssh-copy-id -i ~/.ssh/id_rsa.pub localhost
+ssh-copy-id -i ~/.ssh/id_rsa.pub vm111.kocap.com ~ vm211.kocap.com
+
+pscp -h ~/hosts.txt ~/.ssh/authorized_keys  ~/.ssh/ 
+pscp -h ~/hosts.txt ~/.ssh/id_rsa  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/id_rsa.pub  ~/.ssh/
+pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
+
+pssh -h ~/hosts.txt service iptables stop
+pssh -h ~/hosts.txt chkconfig iptables off
+
+
+## Kerberos 설정
+- 출처 : http://bloodguy.tistory.com/954
+- Kerberos는 fault tolerance를 위해 replication을 제공함.
+- master-slave(s)로 구성되며, 평소에는 master에서 다 처리하고 주기적으로 master의 db를 slave(s)에 sync하는 방식으로 유지되다가, master가 죽으면 slave가 처리하는 방식.
+    - 1. 서버는 master(vm111.kocap.com), slave(vm111.kocap.com)로 구성.
+    - 2. hostname은 kocap.com이며 realm은 KOCAP.COM
+    - 3. centos 기준
+
+- root 권한으로
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/portreserve-0.0.4-9.el6.x86_64.rpm  ~/ 
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/words-3.0-17.el6.noarch.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-server-1.10.3-42.el6.x86_64.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-libs-1.10.3-42.el6.x86_64.rpm  ~/
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-workstation-1.10.3-42.el6.x86_64.rpm  ~/
+
+pssh -h ~/hosts.txt  rpm -Uvh portreserve-0.0.4-9.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh words-3.0-17.el6.noarch.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
+pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
+
+
+vi /etc/krb5.conf
+```
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ default_realm = KOCAP.COM
+ dns_lookup_realm = false
+ dns_lookup_kdc = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+
+[realms]
+ KOCAP.COM = {
+  kdc = vm111.kocap.com:88
+  kdc = vm112.kocap.com:88
+  admin_server = vm111.kocap.com:749
+  default_domain = kocap.com
+ }
+
+[domain_realm]
+ .kocap.com = KOCAP.COM
+ kocap.com = KOCAP.COM
+```
+
+vi /var/kerberos/krb5kdc/kdc.conf
+```
+[kdcdefaults]
+ kdc_ports = 88
+ kdc_tcp_ports = 88
+
+[realms]
+ KOCAP.COM = {
+  #master_key_type = aes256-cts
+  acl_file = /var/kerberos/krb5kdc/kadm5.acl
+  dict_file = /usr/share/dict/words
+  admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab
+  supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
+ }
+
+```
+
+- Database 생성
+```
+kdb5_util create -s
+```
+
+- vi /var/kerberos/krb5kdc/kadm5.acl
+```
+*/admin@KOCAP.COM       *
+```
+
+- kadmin.local -q "addprinc admin/admin"
+- service krb5kdc start
