@@ -4,6 +4,7 @@
 ## Native LIB 만들기
 
 ### 빌드도구 설치
+```
 yum install libgcc_s.so.1 gcc-c++ cmake openssl-devel -y
  
 cd /home/kvm/kocap/installer2.4/rpm/hadoop
@@ -21,16 +22,19 @@ tar xvf apache-maven-3.0.5-bin.tar.gz
 ln -s /home/kvm/kocap/installer2.4/rpm/hadoop/apache-maven-3.0.5 /usr/local/maven
 export PATH=/usr/local/maven/bin:$PATH
 mvn -version
-
+```
 
 ### Snappy 설치
+```
 cd /home/kvm/kocap/installer2.4/rpm/hadoop
 wget https://github.com/google/snappy/releases/download/1.1.3/snappy-1.1.3.tar.gz
 tar xvf snappy-1.1.3.tar.gz
 cd snappy-1.1.3
 ./configure && make && make install
+```
 
 ### 하둡 빌드
+```
 cd /home/kvm/kocap/installer2.4/rpm/hadoop
 wget https://archive.apache.org/dist/hadoop/common/hadoop-2.4.1/hadoop-2.4.1-src.tar.gz
 tar xvfz hadoop-2.4.1-src.tar.gz
@@ -38,10 +42,12 @@ cd hadoop-2.4.1-src
 mvn package -Pdist,native -DskipTests -Dtar
 mv hadoop-dist/target/hadoop-2.4.1/lib/native  ../hadoop-2.4.1_lib_native
 cp /usr/local/lib/libsnappy*  ../hadoop-2.4.1_lib_native/
+```
 
 ## 준비 
 
 - localhost 에서    root 권한
+```
 rm -rf ~/.ssh/
 ssh-keygen
 ssh-copy-id -i ~/.ssh/id_rsa.pub localhost
@@ -79,11 +85,14 @@ pscp -h ~/hosts.txt ~/.ssh/authorized_keys  ~/.ssh/
 pscp -h ~/hosts.txt ~/.ssh/id_rsa  ~/.ssh/
 pscp -h ~/hosts.txt ~/.ssh/id_rsa.pub  ~/.ssh/
 pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
+```
 
 ## java 설치
 - root 권한으로
+```
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/jdk-7u79-linux-x64.rpm ~/ 
 pssh -h ~/hosts.txt  rpm -Uvh ~/jdk-7u79-linux-x64.rpm  
+``
 
 - su fbpuser 으로 사용자 권한으로
 vi ~/.bash_profile
