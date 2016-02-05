@@ -64,6 +64,7 @@ pssh -h ~/hosts.txt  rpm -Uvh words-3.0-17.el6.noarch.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
+
 ```
 
 
@@ -225,7 +226,7 @@ Database propagation to vm112: SUCCEEDED
 [root@vm112]# service krb5kdc start
 ```
 
-
+# 이후 관련 확인 ~~~~~~~~~~~~~
 
 
 
