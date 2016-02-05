@@ -194,8 +194,16 @@ ${HADOOP_HOME}/bin/hadoop checknative  # Check Native
 vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
 <configuration>
     <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/home/fbpuser/data/hadoop/tmp</value>
+    </property>
+    <property>
         <name>fs.defaultFS</name>
         <value>hdfs://cap-hadoop-cluster</value>
+    </property>
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/home/fbpuser/data/hadoop/jn</value>
     </property>
     <property>
         <name>ha.zookeeper.quorum</name>
@@ -375,10 +383,7 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
         <name>dfs.nameservices</name>
         <value>cap-hadoop-cluster</value>
     </property>
-    <property>
-        <name>dfs.journalnode.edits.dir</name>
-        <value>/home/fbpuser/data/hadoop/jn</value>
-    </property>
+
 
     <!-- HA configuration -->
     <property>
@@ -405,7 +410,7 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
     <!-- Storage for edits' files -->
     <property>
         <name>dfs.namenode.shared.edits.dir</name>
-        <value>qjournal://vm111:8485;vm112:8485/cap-hadoop-cluster</value>
+        <value>qjournal://vm111:8485;vm112:8485;vm211:8485/cap-hadoop-cluster</value>
     </property>
     <property>
         <name>dfs.namenode.max.extra.edits.segments.retained</name>
@@ -414,7 +419,7 @@ vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
 
     <!-- Client failover -->
     <property>
-        <name>dfs.client.failover.proxy.provider.ha-nn</name>
+        <name>dfs.client.failover.proxy.provider.cap-hadoop-cluster</name>
         <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
     </property>
 
