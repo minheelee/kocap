@@ -110,15 +110,56 @@ vi /var/kerberos/krb5kdc/kdc.conf
 
 ```
 
-- Database 생성
-```
-kdb5_util create -s
-```
-
 - vi /var/kerberos/krb5kdc/kadm5.acl
 ```
 */admin@KOCAP.COM       *
 ```
 
-- kadmin.local -q "addprinc admin/admin"
-- service krb5kdc start
+
+- Database 생성 : 시간이 많이 걸림, 당황하지 말고 기다리자.
+```
+kdb5_util create -s
+```
+
+- kadmin 시작
+```
+service kadmin start
+```
+
+- 최초 관리자 생성
+```
+kadmin.local -q "addprinc admin/admin"
+service krb5kdc start
+```
+
+- 테스트
+```
+ kadmin -p admin/admin
+// principal 추가
+kadmin: addprinc kocap/kocap.com@KOCAP.COM
+
+// 비번 입력
+kocap
+
+// 추가된 principal 확인
+kadmin: listprincs
+
+// 종료
+quit
+
+
+// 인증 테스트
+kinit kocap/kocap.com
+// 비번 입력
+kocap
+
+
+// 티켓 확인
+klist
+
+// 티켓 삭제
+kdestroy
+klist
+
+```
+
