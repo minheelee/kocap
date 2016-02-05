@@ -52,6 +52,7 @@ pssh -h ~/hosts.txt chkconfig iptables off
     - 3. centos 기준
 
 - root 권한으로
+```
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/portreserve-0.0.4-9.el6.x86_64.rpm  ~/ 
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/words-3.0-17.el6.noarch.rpm  ~/
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-server-1.10.3-42.el6.x86_64.rpm  ~/
@@ -63,9 +64,11 @@ pssh -h ~/hosts.txt  rpm -Uvh words-3.0-17.el6.noarch.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
+```
+
 
 - vm111에 접속해서 
-vi /etc/krb5.conf
+- vi /etc/krb5.conf
 ```
 [logging]
  default = FILE:/var/log/krb5libs.log
@@ -93,7 +96,7 @@ vi /etc/krb5.conf
  kocap.com = KOCAP.COM
 ```
 
-vi /var/kerberos/krb5kdc/kdc.conf
+- vi /var/kerberos/krb5kdc/kdc.conf
 ```
 [kdcdefaults]
  kdc_ports = 88
@@ -107,7 +110,6 @@ vi /var/kerberos/krb5kdc/kdc.conf
   admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab
   supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
  }
-
 ```
 
 - vi /var/kerberos/krb5kdc/kadm5.acl
