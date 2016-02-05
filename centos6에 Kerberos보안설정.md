@@ -165,3 +165,72 @@ klist
 
 ```
 
+## Kerberos 복제( 이중화 )
+- host principal 생성
+```
+[root@vm111]# kadmin  -p admin/admin
+kadmin: addprinc -randkey host/vm111
+kadmin: addprinc -randkey host/vm112
+
+kadmin: ktadd host/vm111
+kadmin: ktadd host/vm112
+kadmin: quit
+```
+
+- keytab 복사 master -> slave
+```
+[root@vm111]# scp /etc/krb5.keytab root@vm112:/etc
+```
+
+- 각종 설정파일 복사 master -> slave
+```
+[root@vm111]# scp /etc/krb5.conf                          root@vm112:/etc
+[root@vm111]# scp /var/kerberos/krb5kdc/kdc.conf          root@vm112:/var/kerberos/krb5kdc
+[root@vm111]# scp /var/kerberos/krb5kdc/kadm5.acl         root@vm112:/var/kerberos/krb5kdc
+[root@vm111]# scp /var/kerberos/krb5kdc/.k5.KOCAP.COM     root@vm112:/var/kerberos/krb5kdc
+```
+
+- slave vm112에서 /var/kerberos/krb5kdc/kpropd.acl 파일을 만들고 아래 내용 입력 후 저장
+```
+host/vm111@KOCAP.COM
+host/vm112@KOCAP.COM
+```
+
+- slave에서 kpropd 시작
+```
+[root@vm112]# service kprop start
+```
+
+- db dump
+```
+[root@vm111]# kdb5_util dump /var/kerberos/krb5kdc/slave_datatrans
+## slave_datatrans, slave_datatrans.dump_ok 파일 존재여부 확인
+ls -l /var/kerberos/krb5kdc/
+```
+
+- master -> slave db propagate
+```
+[root@vm111]# kprop -f /var/kerberos/krb5kdc/slave_datatrans vm112
+Database propagation to vm112: SUCCEEDED
+```
+
+- slave에서 propagation 결과확인
+```
+## /var/kerberos/krb5kdc 디렉토리에 principal 관련 파일들과 from_master라는 파일이 있어야 함.
+[root@vm112]# ls -l /var/kerberos/krb5kdc
+```
+
+- slave의 krb5kdc 시작
+```
+[root@vm112]# service krb5kdc start
+```
+
+
+
+
+
+
+
+
+
+
