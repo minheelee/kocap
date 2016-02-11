@@ -85,20 +85,20 @@ Client {
 scp ${ZOOKEEPER_HOME}/conf/zkcli.keytab vm112:${ZOOKEEPER_HOME}/conf
 scp ${ZOOKEEPER_HOME}/conf/zkcli.keytab vm211:${ZOOKEEPER_HOME}/conf
 
-## vm112와 vm211에도 Client 설정 추가
-
+// ## vm112와 vm211에도 Client 설정 추가
 ```
 
 ## 확인
 - 전체 Zookeeper 재시작
+```
 ${ZOOKEEPER_HOME}/bin/zkServer.sh restart
 
 // 접속 
 [root@server01]# ${ZOOKEEPER_HOME}/bin/zkCli.sh -server vm111:2181
 
 // zookeeper.out 파일에 보면 아래와 같은 인증관련 로그 확인 가능
-2015-04-20 15:25:07,908 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@118] - Successfully authenticated client: authenticationID=zkcli@REALM.COM;  authorizationID=zkcli@REALM.COM.
-2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@134] - Setting authorizedID: zkcli@REALM.COM
-2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@964] - adding SASL authorization for authorizationID: zkcli@REALM.COM
-
+2015-04-20 15:25:07,908 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@118] - Successfully authenticated client: authenticationID=zkcli@KOCAP.COM;  authorizationID=zkcli@KOCAP.COM.
+2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@134] - Setting authorizedID: zkcli@KOCAP.COM
+2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@964] - adding SASL authorization for authorizationID: zkcli@KOCAP.COM
+```
 
