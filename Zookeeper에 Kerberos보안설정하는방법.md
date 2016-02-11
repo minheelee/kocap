@@ -19,3 +19,33 @@ kadmin: xst -k zookeeper.keytab zookeeper/vm111@KOCAP.COM
 
 kadmin: quit
 ```
+
+- keytab 설정
+```
+cp zookeeper.keytab /home/fbpuser/zookeeper-3.4.6/conf/
+chmod 400 /home/fbpuser/zookeeper-3.4.6/conf/zookeeper.keytab
+chown fbpuser:fbpgroup /home/fbpuser/zookeeper-3.4.6/conf/zookeeper.keytab
+```
+
+- su fbpuser
+- source ~/.bash_profile
+``` 
+vi ${ZOOKEEPER_HOME}/conf/zoo.cfg
+authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+jaasLoginRenew=3600000
+
+
+vi ${ZOOKEEPER_HOME}/conf/jaas.conf
+Server {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  keyTab="/home/fbpuser/zookeeper-3.4.6/conf/zookeeper.keytab"
+  storeKey=true
+  useTicketCache=false
+  principal="zookeeper/vm111@KOCAP.COM";
+};
+
+vi ${ZOOKEEPER_HOME}/conf/java.env
+export JVMFLAGS="-Djava.security.auth.login.config=/home/fbpuser/zookeeper-3.4.6/conf/jaas.conf"
+```
+
