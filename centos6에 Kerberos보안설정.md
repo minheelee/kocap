@@ -12,7 +12,7 @@ cd pssh-2.1.1
 wget 'http://peak.telecommunity.com/dist/ez_setup.py'
 python ez_setup.py
 python setup.py install
-```
+
 
 cat > ~/hosts.txt <<HOSTS
 vm111
@@ -41,7 +41,7 @@ pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
 
 pssh -h ~/hosts.txt service iptables stop
 pssh -h ~/hosts.txt chkconfig iptables off
-
+```
 
 ## Kerberos 설정
 - 출처 : http://bloodguy.tistory.com/954
