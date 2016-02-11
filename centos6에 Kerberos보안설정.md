@@ -226,12 +226,28 @@ Database propagation to vm112: SUCCEEDED
 [root@vm112]# service krb5kdc start
 ```
 
-# 이후 관련 확인 ~~~~~~~~~~~~~
+## failover 테스트
+- master kdc stop
+```
+[root@vm111]# service krb5kdc stop
+```
 
 
+- kinit 테스트
+```
+[root@vm111]# kinit kocap/kocap.com
+Password for kocap/kocap.com@KCAP.COM:
+// 비번 입력
+kocap
+```
 
-
-
+- slave인 vm112의 krb5kdc를 통해 성공함.
+- vm112의 /var/log/krb5kdc.log 보면 아래와 같은 인증성공 로그를 확인 가능.
+```
+vi /var/log/krb5kdc.log
+...
+Apr 17 15:11:34 kdc2.bloodguy.com krb5kdc[6458](info): AS_REQ (12 etypes {18 17 16 23 1 3 2 11 10 15 12 13}) 111.111.111.111: ISSUE: authtime 1429251094, etypes {rep=18 tkt=18 ses=18}, admin/bloodguy.com@BLOODGUY.COM for krbtgt/BLOODGUY.COM@BLOODGUY.COM
+```
 
 
 
