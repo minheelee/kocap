@@ -93,7 +93,7 @@ pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/jdk-7u79-linux-x64.rpm ~/ 
 pssh -h ~/hosts.txt  rpm -Uvh ~/jdk-7u79-linux-x64.rpm  
 
-- su fbpuser 으로 사용자 권한으로
+- vm111에 su fbpuser 으로 사용자 권한으로
 vi ~/.bash_profile
 export JAVA_HOME=/usr/java/latest
 export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin
