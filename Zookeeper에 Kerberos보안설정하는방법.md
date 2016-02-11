@@ -1,8 +1,8 @@
 
 # Zookeeper에 Kerberos보안설정하는방법
 - 사전 작업
-    - centos6에 [Kerberos보안설정.md](Kerberos보안설정.md)
-    - centos6에 [hadoop2.4설치및HA구성.md](hadoop2.4설치및HA구성.md) 에서 zookeeper 설치 참조
+    - centos6에 [Kerberos보안설정.md](https://github.com/minheelee/kocap/blob/master/centos6%EC%97%90%20Kerberos%EB%B3%B4%EC%95%88%EC%84%A4%EC%A0%95.md)
+    - centos6에 [hadoop2.4설치및HA구성.md](https://github.com/minheelee/kocap/blob/master/centos6%EC%97%90%20hadoop2.4%EC%84%A4%EC%B9%98%EB%B0%8FHA%EA%B5%AC%EC%84%B1.md) 에서 zookeeper 설치 참조
 
 - 출처 : http://bloodguy.tistory.com/957
 
