@@ -250,4 +250,25 @@ Apr 17 15:11:34 kdc2.bloodguy.com krb5kdc[6458](info): AS_REQ (12 etypes {18 17 
 ```
 
 
+- 주기적인 db propagation을 위해 스크립트를 하나 만듬.
+``` 
+vi /var/kerberos/krb5kdc/repl.sh
+#!/bin/sh
+ 
+kdclist="vm112.kocap.com"
+/usr/kerberos/sbin/kdb5_util dump /var/kerberos/krb5kdc/slave_datatrans
+for kdc in $kdclist
+do
+    /usr/kerberos/sbin/kprop -f /var/kerberos/krb5kdc/slave_datatrans $kdc
+done
+
+
+실행권한을 주고
+[root@vm111]# chmod 0755 /var/kerberos/krb5kdc/repl.sh
+
+crontab에 아래처럼 등록. 5분에 한 번씩 master-slave db sync
+*/5 * * * * /var/kerberos/krb5kdc/repl.sh
+```
+
+
 

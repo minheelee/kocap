@@ -8,7 +8,6 @@
 
 ## Zookeeper 서버 설정
 
-
 - principal, keytab 파일생성
 ```
 [root@vm111]# kadmin  -p admin/admin
@@ -48,4 +47,58 @@ Server {
 vi ${ZOOKEEPER_HOME}/conf/java.env
 export JVMFLAGS="-Djava.security.auth.login.config=/home/fbpuser/zookeeper-3.4.6/conf/jaas.conf"
 ```
+
+## Zookeeper 클라이언트 설정
+- principal, keytab
+```
+[root@vm111]# kadmin  -p admin/admin
+// principal 추가
+kadmin: addprinc -randkey zkcli@KOCAP.COM
+// keytab 생성
+kadmin: xst -k zkcli.keytab zkcli@KOCAP.COM
+kadmin: quit
+```
+
+
+- keytab 설정
+```
+// zkcli.keytab 파일 이동
+[root@vm111]# cp zkcli.keytab /home/fbpuser/zookeeper-3.4.6/conf/
+
+// 읽기 전용 권한조정
+[root@vm111]# chmod 400 /home/fbpuser/zookeeper-3.4.6/conf/zkcli.keytab
+[root@vm111]# chown fbpuser:fbpgroup /home/fbpuser/zookeeper-3.4.6/conf/zkcli.keytab
+```
+
+- jaas.conf 파일에 Client 설정 추가
+```
+vi ${ZOOKEEPER_HOME}/conf/jaas.con
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  keyTab="/home/fbpuser/zookeeper-3.4.6/conf/zkcli.keytab"
+  storeKey=true
+  useTicketCache=false
+  principal="zkcli@KOCAP.COM";
+};
+
+scp ${ZOOKEEPER_HOME}/conf/zkcli.keytab vm112:${ZOOKEEPER_HOME}/conf
+scp ${ZOOKEEPER_HOME}/conf/zkcli.keytab vm211:${ZOOKEEPER_HOME}/conf
+
+## vm112와 vm211에도 Client 설정 추가
+
+```
+
+## 확인
+- 전체 Zookeeper 재시작
+${ZOOKEEPER_HOME}/bin/zkServer.sh restart
+
+// 접속 
+[root@server01]# ${ZOOKEEPER_HOME}/bin/zkCli.sh -server vm111:2181
+
+// zookeeper.out 파일에 보면 아래와 같은 인증관련 로그 확인 가능
+2015-04-20 15:25:07,908 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@118] - Successfully authenticated client: authenticationID=zkcli@REALM.COM;  authorizationID=zkcli@REALM.COM.
+2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:SaslServerCallbackHandler@134] - Setting authorizedID: zkcli@REALM.COM
+2015-04-20 15:25:07,917 [myid:1] - INFO  [NIOServerCxn.Factory:0.0.0.0/0.0.0.0:2181:ZooKeeperServer@964] - adding SASL authorization for authorizationID: zkcli@REALM.COM
+
 
