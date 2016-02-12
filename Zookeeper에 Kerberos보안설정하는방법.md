@@ -72,7 +72,7 @@ kadmin: quit
 
 - jaas.conf 파일에 Client 설정 추가
 ```
-vi ${ZOOKEEPER_HOME}/conf/jaas.con
+vi ${ZOOKEEPER_HOME}/conf/jaas.conf
 Client {
   com.sun.security.auth.module.Krb5LoginModule required
   useKeyTab=true
