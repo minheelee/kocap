@@ -55,7 +55,7 @@ pssh -h ~/hosts.txt chkconfig iptables off
 ```
 mkdir -p /home/kvm/kocap/
 cd /home/kvm/kocap/
-svn co  svn://112.172.129.142/NGT/BigData/Sources/HadoopMonitoring/installer2.4  --username  ID  --password 비번
+svn co  svn://xxx.xxx.xxx.xxx/NGT/BigData/Sources/HadoopMonitoring/installer2.4  --username  ID  --password 비번
 cd installer2.4 
 ```
 
