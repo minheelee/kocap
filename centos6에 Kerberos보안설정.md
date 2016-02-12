@@ -47,7 +47,7 @@ pssh -h ~/hosts.txt chkconfig iptables off
 - 출처 : http://bloodguy.tistory.com/954
 - Kerberos는 fault tolerance를 위해 replication을 제공함.
 - master-slave(s)로 구성되며, 평소에는 master에서 다 처리하고 주기적으로 master의 db를 slave(s)에 sync하는 방식으로 유지되다가, master가 죽으면 slave가 처리하는 방식.
-    - 1. 서버는 master(vm111), slave(vm111)로 구성.
+    - 1. 서버는 master(vm111), slave(vm112)로 구성.
     - 2. hostname은 kocap.com이며 realm은 KOCAP.COM
     - 3. centos 기준
 
