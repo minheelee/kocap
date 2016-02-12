@@ -48,6 +48,9 @@ vi ${ZOOKEEPER_HOME}/conf/java.env
 export JVMFLAGS="-Djava.security.auth.login.config=/home/fbpuser/zookeeper-3.4.6/conf/jaas.conf"
 ```
 
+- vm112와 vm211에도 동일하게 설정
+
+
 ## Zookeeper 클라이언트 설정
 - principal, keytab
 ```

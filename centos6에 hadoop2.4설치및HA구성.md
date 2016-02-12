@@ -101,6 +101,12 @@ pscp -h ~/hosts.txt ~/.ssh/known_hosts  ~/.ssh/
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/jdk-7u79-linux-x64.rpm ~/ 
 pssh -h ~/hosts.txt  rpm -Uvh ~/jdk-7u79-linux-x64.rpm  
 
+### kerberos인증을 위해서 Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files로 업데이터가 필요함.
+### kerberos인증을 하지 않으면 필요없음.
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/UnlimitedJCEPolicyJDK7/US_export_policy.jar  /usr/java/latest/jre/lib/security
+pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/java/UnlimitedJCEPolicyJDK7/local_policy.jar      /usr/java/latest/jre/lib/security
+
+
 - vm111에 su fbpuser 으로 사용자 권한으로
 vi ~/.bash_profile
 export JAVA_HOME=/usr/java/latest

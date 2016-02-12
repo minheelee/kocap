@@ -175,6 +175,17 @@ klist
 
 ```
 
+## Kerberos Clients 설치 및 설정
+```
+##  client를 모든 클러스터에 설치
+rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
+
+## krb5.conf을 모든 클러스터에 설치
+[root@vm111]scp /etc/krb5.conf                          root@vm211:/etc
+[root@vm111]scp /etc/krb5.conf                          root@vm212:/etc
+```
+ 
+
 ## Kerberos 복제( 이중화 )
 - host principal 생성
 ```
