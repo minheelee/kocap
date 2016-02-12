@@ -3,6 +3,7 @@
 
 
 ## 1.  준비
+```
 yum groupinstall -y “Development tools”
 yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
 yum install -y php  php-devel php-pear libssh2 libssh2-devel
@@ -29,8 +30,10 @@ extension=ssh2.so
 
 php -m | grep ssh2 # 확인
 ssh2  
+```
 
 ## 2. 사용법
+```
 svn co  svn://xxx.xxx.xxx.xxx/NGT/BigData/Sources/HadoopMonitoring/installer  --username  ID  --password 비번
 cd installer 
 
@@ -43,7 +46,7 @@ vi /etc/hosts # IP  hostname을 등록함. DNS 등록되어 있으면 생략함.
 ./fbp_install.sh  # 시작함. 
 
 root 비번 :Vlffldzm!@#
-
+```
 
 ### 실패시
 ```
