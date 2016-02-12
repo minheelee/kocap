@@ -1,6 +1,14 @@
 
 # CentOS6에 Hadoop2.4설치 및 HA구성
 
+## 설치용 패키지 받기
+```
+mkdir -p /home/kvm/kocap/
+cd /home/kvm/kocap/
+svn co  svn://112.172.129.142/NGT/BigData/Sources/HadoopMonitoring/installer2.4  --username  ID  --password 비번
+cd installer2.4 
+```
+
 ## Native LIB 만들기
 
 ### 빌드도구 설치

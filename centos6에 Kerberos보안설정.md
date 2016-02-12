@@ -51,18 +51,26 @@ pssh -h ~/hosts.txt chkconfig iptables off
     - 2. hostname은 kocap.com이며 realm은 KOCAP.COM
     - 3. centos 기준
 
+- 설치용 패키지 받기
+```
+mkdir -p /home/kvm/kocap/
+cd /home/kvm/kocap/
+svn co  svn://112.172.129.142/NGT/BigData/Sources/HadoopMonitoring/installer2.4  --username  ID  --password 비번
+cd installer2.4 
+```
+
 - root 권한으로
 ```
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/portreserve-0.0.4-9.el6.x86_64.rpm  ~/ 
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/words-3.0-17.el6.noarch.rpm  ~/
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-server-1.10.3-42.el6.x86_64.rpm  ~/
-pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-libs-1.10.3-42.el6.x86_64.rpm  ~/
+#pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-libs-1.10.3-42.el6.x86_64.rpm  ~/
 pscp -h ~/hosts.txt  /home/kvm/kocap/installer2.4/rpm/kerberos/krb5-workstation-1.10.3-42.el6.x86_64.rpm  ~/
 
 pssh -h ~/hosts.txt  rpm -Uvh portreserve-0.0.4-9.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh words-3.0-17.el6.noarch.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-server-1.10.3-42.el6.x86_64.rpm
-pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
+#pssh -h ~/hosts.txt  rpm -Uvh krb5-libs-1.10.3-42.el6.x86_64.rpm
 pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
 
 ```
@@ -95,6 +103,7 @@ pssh -h ~/hosts.txt  rpm -Uvh krb5-workstation-1.10.3-42.el6.x86_64.rpm
 [domain_realm]
  .kocap.com = KOCAP.COM
  kocap.com = KOCAP.COM
+
 ```
 
 - vi /var/kerberos/krb5kdc/kdc.conf
@@ -137,7 +146,7 @@ service krb5kdc start
 
 - 테스트
 ```
- kadmin -p admin/admin
+kadmin -p admin/admin
 // principal 추가
 kadmin: addprinc kocap/kocap.com@KOCAP.COM
 
@@ -185,10 +194,11 @@ kadmin: quit
 
 - 각종 설정파일 복사 master -> slave
 ```
-[root@vm111]# scp /etc/krb5.conf                          root@vm112:/etc
-[root@vm111]# scp /var/kerberos/krb5kdc/kdc.conf          root@vm112:/var/kerberos/krb5kdc
-[root@vm111]# scp /var/kerberos/krb5kdc/kadm5.acl         root@vm112:/var/kerberos/krb5kdc
-[root@vm111]# scp /var/kerberos/krb5kdc/.k5.KOCAP.COM     root@vm112:/var/kerberos/krb5kdc
+[root@vm111]# 
+scp /etc/krb5.conf                          root@vm112:/etc
+scp /var/kerberos/krb5kdc/kdc.conf          root@vm112:/var/kerberos/krb5kdc
+scp /var/kerberos/krb5kdc/kadm5.acl         root@vm112:/var/kerberos/krb5kdc
+scp /var/kerberos/krb5kdc/.k5.KOCAP.COM     root@vm112:/var/kerberos/krb5kdc
 ```
 
 - slave vm112에서 /var/kerberos/krb5kdc/kpropd.acl 파일을 만들고 아래 내용 입력 후 저장
