@@ -131,5 +131,284 @@ quit
 rm -f *unmerged.keytab
 ```
 
-# 이후 작업 ~~~~~~~~~~
+- 퍼미션 설정
+```
+chown fbpuser:fbpgroup *.keytab
+chmod 400 *.keytab
+```
+
+- 각각의 서버에 배포
+```
+cp *.keytab  /home/fbpuser/
+su fbpuser
+cd  
+scp vm111-hdfs.keytab  vm111:/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab
+scp vm111-yarn.keytab  vm111:/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab
+
+scp vm112-hdfs.keytab  vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab
+scp vm112-yarn.keytab  vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab
+
+scp vm211-hdfs.keytab  vm211:/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab
+scp vm211-yarn.keytab  vm211:/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab
+
+scp vm212-hdfs.keytab  vm212:/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab
+scp vm212-yarn.keytab  vm212:/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab
+
+```
+
+
+## Directory Permission
+- 
+
+
+## container-executor 빌드
+
+
+## 설정파일
+```
+vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
+<!-- 보안설정 -->
+<property>
+    <name>hadoop.security.authentication</name>
+    <value>kerberos</value>
+</property>
+<property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+</property>
+<property>
+    <name>hadoop.rpc.protection</name>
+    <value>privacy</value>
+</property>
+ 
+<!-- SPNEGO/Kerberos - 웹접속 관련 보안설정 -->
+<property>
+    <name>hadoop.http.filter.initializers</name>
+    <value>org.apache.hadoop.security.AuthenticationFilterInitializer</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.type</name>
+    <value>kerberos</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.token.validity</name>
+    <value>36000</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.signature.secret.file</name>
+    <value>/home/hadoop/etc/hadoop/hadoop-http-auth-signature-secret</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.cookie.domain</name>
+    <value>kocap.com</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.simple.anonymous.allowed</name>
+    <value>false</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.kerberos.principal</name>
+    <value>HTTP/_HOST@KOCAP.COM</value>
+</property>
+<property>
+    <name>hadoop.http.authentication.kerberos.keytab</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+ 
+<!-- Encrypted Shuffle - Map->Reduce 데이터 전달시 암호화 -->
+<property>
+    <name>hadoop.ssl.require.client.cert</name>
+    <value>false</value>
+    <final>true</final>
+</property>
+<property>
+    <name>hadoop.ssl.hostname.verifier</name>
+    <value>DEFAULT</value>
+    <final>true</final>
+</property>
+<property>
+    <name>hadoop.ssl.keystores.factory.class</name>
+    <value>org.apache.hadoop.security.ssl.FileBasedKeyStoresFactory</value>
+    <final>true</final>
+</property>
+<property>
+    <name>hadoop.ssl.server.conf</name>
+    <value>ssl-server.xml</value>
+    <final>true</final>
+</property>
+<property>
+    <name>hadoop.ssl.client.conf</name>
+    <value>ssl-client.xml</value>
+    <final>true</final>
+</property>
+
+
+vi ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml
+<!-- SECURITY -->
+<property>
+    <name>dfs.block.access.token.enable</name>
+    <value>true</value>
+</property>
+<property>
+    <name>dfs.data.transfer.protection</name>
+    <value>privacy</value>
+</property>
+<property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
+</property>
+<!-- JournalNode -->
+<property>
+    <name>dfs.journalnode.keytab.file</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+<property>
+    <name>dfs.journalnode.kerberos.principal</name>
+    <value>hdfs/_HOST@KOCAP.COM</value>
+</property>
+<property>
+    <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
+    <value>HTTP/_HOST@KOCAP.COM</value>
+</property>
+<!-- NameNode -->
+<property>
+    <name>dfs.namenode.https-address.hadoop-cluster.nn1</name>
+    <value>vm111:50470</value>
+</property>
+<property>
+    <name>dfs.namenode.https-address.hadoop-cluster.nn2</name>
+    <value>vm112:50470</value>
+</property>
+<property>
+    <name>dfs.namenode.keytab.file</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+<property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value>hdfs/_HOST@KOCAP.COM</value>
+</property>
+<property>
+    <name>dfs.namenode.kerberos.internal.spnego.principal</name>
+    <value>${dfs.web.authentication.kerberos.principal}</value>
+</property>
+<!-- DataNode -->
+<property>
+    <name>dfs.datanode.data.dir.perm</name>
+    <value>700</value>
+</property>
+<property>
+    <name>dfs.datanode.https.address</name>
+    <value>0.0.0.0:50475</value>
+</property>
+<property>
+    <name>dfs.datanode.keytab.file</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+<property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value>hdfs/_HOST@KOCAP.COM</value>
+</property>
+<!-- Web -->
+<property>
+    <name>dfs.web.authentication.kerberos.keytab</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+<property>
+    <name>dfs.web.authentication.kerberos.principal</name>
+    <value>HTTP/_HOST@KOCAP.COM</value>
+</property>
+
+
+vi ${HADOOP_HOME}/etc/hadoop/mapred-site.xml
+<!-- JobHistoryServer 보안설정 -->
+<property>
+    <name>mapreduce.jobhistory.keytab</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hdfs.keytab</value>
+</property>
+<property>
+    <name>mapreduce.jobhistory.principal</name>
+    <value>hdfs/_HOST@KOCAP.COM</value>
+</property>
+<property>
+    <name>mapreduce.jobhistory.http.policy</name>
+    <value>HTTPS_ONLY</value>
+</property>
+<property>
+    <name>mapreduce.jobhistory.webapp.https.address</name>
+    <value>vm111:19888</value>
+</property>
+<!-- Map/Reduce Shuffle SSL 설정 -->
+<property>
+    <name>mapreduce.shuffle.ssl.enabled</name>
+    <value>true</value>
+    <final>true</final>
+</property>
+
+
+
+vi ${HADOOP_HOME}/etc/hadoop/yarn-site.xml
+<!-- ResourceManager 보안설정 -->
+<property>
+    <name>yarn.resourcemanager.keytab</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab</value>
+</property>
+<property>
+    <name>yarn.resourcemanager.principal</name>
+    <value>yarn/_HOST@KOCAP.COM</value>
+</property>
+<!-- NodeManager 보안설정 -->
+<property>
+    <name>yarn.nodemanager.keytab</name>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab</value>
+</property>
+<property>
+    <name>yarn.nodemanager.principal</name>
+    <value>yarn/_HOST@KOCAP.COM</value>
+</property>
+<!-- ContainerExecutor 관련 -->
+<property>
+    <name>yarn.nodemanager.container-executor.class</name>
+    <value>org.apache.hadoop.yarn.server.nodemanager.LinuxContainerExecutor</value>
+</property>
+<property>
+    <name>yarn.nodemanager.linux-container-executor.group</name>
+    <value>fbpuser</value>
+</property>
+<property>
+    <name>yarn.nodemanager.linux-container-executor.path</name>
+    <value>/home/fbpuser/hadoop-2.4.1/bin/container-executor</value>
+</property>
+<!-- WEB 관련 -->
+<property>
+    <name>yarn.http.policy</name>
+    <value>HTTPS_ONLY</value>
+</property>
+<property>
+    <name>yarn.resourcemanager.webapp.https.address</name>
+    <value>0.0.0.0:8090</value>
+</property>
+<property>
+    <name>yarn.nodemanager.webapp.https.address</name>
+    <value>0.0.0.0:8042</value>
+</property>
+<property>
+    <name>yarn.log.server.url</name>
+    <value>https://vm111:19888/jobhistory/logs</value>
+</property>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
