@@ -158,11 +158,105 @@ scp vm212-yarn.keytab  vm212:/home/fbpuser/hadoop-2.4.1/etc/hadoop/yarn.keytab
 
 
 ## Directory Permission
-- 
+- HDFS (로컬 디렉토리가 아니라 HDFS 디렉토리임에 주의)
+- hdfs와 yarn에 대한 사용자가 fbpuser로 동일하므로 특별히 변경이 필요없음.
+- 각각 다른 경우에 아래를 참고함.
+```
+/* 
+/    = hdfs:hadoop (775)
+*/
+hdfs dfs -chown hdfs:hadoop /
+hdfs dfs -chmod 775 /
+
+
+/* 
+/tmp = hdfs:hadoop (777)
+*/
+hdfs dfs -chown hdfs:hadoop /tmp
+hdfs dfs -chmod 777 /tmp
+
+/* 
+/user = hdfs:hadoop (755)
+*/
+hdfs dfs -chown hdfs:hadoop /user
+hdfs dfs -chmod 755 /user
+
+/*
+yarn.nodemanager.remote-app-log-dir[/tmp/logs] = yarn:hadoop (777)
+*/
+hdfs dfs -chown yarn:hadoop /tmp/logs
+hdfs dfs -chmod 777 /tmp/logs
+
+hdfs dfs -chown yarn:hadoop /tmp/hadoop-yarn
+hdfs dfs -chmod 777 /tmp/hadoop-yarn
+```
+
+- Local (전체 서버 대상)
+```
+// dfs.namenode.name.dir = hdfs:hadoop (700)
+[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/name
+[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/name
+
+// dfs.datanode.data.dir = hdfs:hadoop (700)
+[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/data
+[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/data
+
+// dfs.journalnode.edits.dir = hdfs:hadoop (700)
+[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/journalnode
+[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/journalnode
+
+// $HADOOP_LOG_DIR       = hdfs:hadoop (775)
+[root@server01]# chown -R hdfs:hadoop /home/fbpuser/hadoop-2.4.1/logs
+[root@server01]# chmod 775 /home/fbpuser/hadoop-2.4.1/logs
+
+// $YARN_LOG_DIR         = yarn:hadoop (775)
+// 위와 동일한 경로(/home/fbpuser/hadoop-2.4.1/logs)로 세팅했으므로 생략.
+
+// yarn.nodemanager.local-dirs = yarn:hadoop (755)
+[root@server01]# chown -R yarn:hadoop /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
+[root@server01]# chmod 755 /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
+
+// yarn.nodemanager.log-dirs   = yarn:hadoop (755)
+// 위와 동일한 경로(/home/fbpuser/hadoop-2.4.1/logs)로 세팅했으므로 생략.
+```
 
 
 ## container-executor 빌드
+- Hadoop 소스코드와 빌드할 수 있는 환경이 세팅되어 있어야 함.
+- [CentOS6에 Hadoop2.4설치 및 HA구성 참고](https://github.com/minheelee/kocap/blob/master/centos6%EC%97%90%20hadoop2.4%EC%84%A4%EC%B9%98%EB%B0%8FHA%EA%B5%AC%EC%84%B1.md)
+- 소스코드가 있고 빌드환경 세팅이 완료되었다면 아래와 같은 과정을 거쳐 빌드 및 설정.
+- 이 과정이 필요한지 확인하지 않았음.
 
+```
+// /home/src/hadoop-2.6.0-src 디렉토리에 소스코드 압축이 풀려있다고 가정함.
+
+// 빌드
+[root@server01]# cd /home/src/hadoop-2.6.0-src/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/
+[root@server01]# mvn package -Dcontainer-executor.conf.dir=/home/hadoop/etc/hadoop -DskipTests -Pnative
+
+// 빌드 결과물 옮기기
+[root@server01]# cp target/native/target/usr/local/bin/* /home/hadoop/bin
+
+// 퍼미션
+[root@server01]# cd /home/hadoop/bin
+[root@server01]# chown root:hadoop container-executor 
+[root@server01]# chmod 6050 container-executor
+
+// cfg 파일 설정
+[root@server01]# vi /home/hadoop/etc/hadoop/container-executor.cfg
+
+yarn.nodemanager.linux-container-executor.group=hadoop
+#banned.users=
+min.user.id=500
+#allowed.system.users=
+
+// cfg 파일 퍼미션 설정
+[root@server01]# chown root:hadoop /home/hadoop/etc/hadoop/container-executor.cfg
+[root@server01]# chmod 0400 /home/hadoop/etc/hadoop/container-executor.cfg
+
+// cfg 파일의 경우 전체 서버에 배포.
+// 빌드된 실행파일의 경우 서버들의 하드웨어, 커널버전 등이 동일하다면 실행파일만 배포하고, 아니라면 각 서버마다 빌드를 해줘야 함.
+```
 
 ## 설정파일
 ```
