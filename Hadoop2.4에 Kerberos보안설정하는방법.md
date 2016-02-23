@@ -194,27 +194,27 @@ hdfs dfs -chmod 777 /tmp/hadoop-yarn
 - Local (전체 서버 대상)
 ```
 // dfs.namenode.name.dir = hdfs:hadoop (700)
-[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/name
-[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/name
+[root@vm111]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/name
+[root@vm111]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/name
 
 // dfs.datanode.data.dir = hdfs:hadoop (700)
-[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/data
-[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/data
+[root@vm111]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/data
+[root@vm111]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/data
 
 // dfs.journalnode.edits.dir = hdfs:hadoop (700)
-[root@server01]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/journalnode
-[root@server01]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/journalnode
+[root@vm111]# chown -R hdfs:hadoop /home/fbpuser/data/hadoop/repository/dfs/journalnode
+[root@vm111]# chmod 700 /home/fbpuser/data/hadoop/repository/dfs/journalnode
 
 // $HADOOP_LOG_DIR       = hdfs:hadoop (775)
-[root@server01]# chown -R hdfs:hadoop /home/fbpuser/hadoop-2.4.1/logs
-[root@server01]# chmod 775 /home/fbpuser/hadoop-2.4.1/logs
+[root@vm111]# chown -R hdfs:hadoop /home/fbpuser/hadoop-2.4.1/logs
+[root@vm111]# chmod 775 /home/fbpuser/hadoop-2.4.1/logs
 
 // $YARN_LOG_DIR         = yarn:hadoop (775)
 // 위와 동일한 경로(/home/fbpuser/hadoop-2.4.1/logs)로 세팅했으므로 생략.
 
 // yarn.nodemanager.local-dirs = yarn:hadoop (755)
-[root@server01]# chown -R yarn:hadoop /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
-[root@server01]# chmod 755 /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
+[root@vm111]# chown -R yarn:hadoop /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
+[root@vm111]# chmod 755 /home/fbpuser/data/hadoop/repository/yarn/nm-local-dir
 
 // yarn.nodemanager.log-dirs   = yarn:hadoop (755)
 // 위와 동일한 경로(/home/fbpuser/hadoop-2.4.1/logs)로 세팅했으므로 생략.
@@ -231,19 +231,19 @@ hdfs dfs -chmod 777 /tmp/hadoop-yarn
 // /home/src/hadoop-2.6.0-src 디렉토리에 소스코드 압축이 풀려있다고 가정함.
 
 // 빌드
-[root@server01]# cd /home/src/hadoop-2.6.0-src/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/
-[root@server01]# mvn package -Dcontainer-executor.conf.dir=/home/hadoop/etc/hadoop -DskipTests -Pnative
+[root@vm111]# cd /home/src/hadoop-2.6.0-src/hadoop-yarn-project/hadoop-yarn/hadoop-yarn-server/hadoop-yarn-server-nodemanager/
+[root@vm111]# mvn package -Dcontainer-executor.conf.dir=/home/hadoop/etc/hadoop -DskipTests -Pnative
 
 // 빌드 결과물 옮기기
-[root@server01]# cp target/native/target/usr/local/bin/* /home/hadoop/bin
+[root@vm111]# cp target/native/target/usr/local/bin/* /home/hadoop/bin
 
 // 퍼미션
-[root@server01]# cd /home/hadoop/bin
-[root@server01]# chown root:hadoop container-executor 
-[root@server01]# chmod 6050 container-executor
+[root@vm111]# cd /home/hadoop/bin
+[root@vm111]# chown root:hadoop container-executor 
+[root@vm111]# chmod 6050 container-executor
 
 // cfg 파일 설정
-[root@server01]# vi /home/hadoop/etc/hadoop/container-executor.cfg
+[root@vm111]# vi /home/hadoop/etc/hadoop/container-executor.cfg
 
 yarn.nodemanager.linux-container-executor.group=hadoop
 #banned.users=
@@ -251,8 +251,8 @@ min.user.id=500
 #allowed.system.users=
 
 // cfg 파일 퍼미션 설정
-[root@server01]# chown root:hadoop /home/hadoop/etc/hadoop/container-executor.cfg
-[root@server01]# chmod 0400 /home/hadoop/etc/hadoop/container-executor.cfg
+[root@vm111]# chown root:hadoop /home/hadoop/etc/hadoop/container-executor.cfg
+[root@vm111]# chmod 0400 /home/hadoop/etc/hadoop/container-executor.cfg
 
 // cfg 파일의 경우 전체 서버에 배포.
 // 빌드된 실행파일의 경우 서버들의 하드웨어, 커널버전 등이 동일하다면 실행파일만 배포하고, 아니라면 각 서버마다 빌드를 해줘야 함.
@@ -492,12 +492,175 @@ vi ${HADOOP_HOME}/etc/hadoop/yarn-site.xml
 ```
 
 
+## SSL 인증서 만들기
+- 보안통신을 위한 SSL 인증서가 필요함.
+- Third party의 진짜 리얼 인증서를 이용하거나, self-signed 를 이용하는 방법도 있음.
+- Openssl을 이용한 internal CA를 이용하는 방법을 사용함.
+```
+// internal CA setup
+[root@vm111]# openssl genrsa -out ca.key 8192
+[root@vm111]# openssl req -new -x509 -extensions v3_ca -key ca.key -out ca.crt -days 18250
+[root@vm111]# mkdir -m 0700 /root/CA /root/CA/certs /root/CA/crl /root/CA/newcerts /root/CA/private
+[root@vm111]# mv ca.key /root/CA/private
+[root@vm111]# mv ca.crt /root/CA/certs
+[root@vm111]# touch /root/CA/index.txt ; echo 1000 >> /root/CA/serial
+[root@vm111]# chmod 0400 /root/CA/private/ca.key
+
+// openssl 설정파일 수정
+[root@vm111]# vi /etc/pki/tls/openssl.cnf
+
+#######################################################################################
+[ CA_default ]
+
+dir         = /root/CA          # Where everything is kept
+certs       = $dir/certs        # Where the issued certs are kept
+crl_dir     = $dir/crl          # Where the issued crl are kept
+database    = $dir/index.txt    # database index file.
+#unique_subject = no            # Set to 'no' to allow creation of
+                                # several ctificates with same subject.
+new_certs_dir = $dir/newcerts   # default place for new certs.
+
+certificate = $dir/cacert.pem   # The CA certificate
+serial      = $dir/serial       # The current serial number
+crlnumber   = $dir/crlnumber    # the current crl number
+                                # must be commented out to leave a V1 CRL
+crl         = $dir/crl.pem           # The current CRL
+private_key = $dir/private/cakey.pem # The private key
+RANDFILE    = $dir/private/.rand     # private random number file
+
+x509_extensions = usr_cert      # The extentions to add to the cert
+#######################################################################################
+
+// cluster trust store 
+[root@vm111]# openssl genrsa -out clusterCA.key 2048
+[root@vm111]# openssl req -x509 -new -key clusterCA.key -days 18250 -out clusterCA.pem
+[root@vm111]# keytool -importcert -alias clusterCA -file clusterCA.pem -keystore clusterTrustStore -storepass "비밀번호"
+
+[root@vm111]# mkdir /home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+[root@vm111]# mv clusterCA.key clusterCA.pem clusterTrustStore /home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+[root@vm111]# cd /home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+
+// host key store
+[root@vm111]# keytool -genkeypair -alias `hostname -s` -keyalg RSA -keysize 1024 -dname "CN=`hostname -f`,OU=foo,O=corp" -keypass "비밀번호" -keystore hostKeyStore -storepass "비밀번호" -validity 18250
+[root@vm111]# keytool -keystore hostKeyStore -alias `hostname -s` -certreq -file host.cert -storepass "비밀번호" -keypass "비밀번호"
+[root@vm111]# openssl x509 -req -CA clusterCA.pem -CAkey clusterCA.key -in host.cert -out host.signed -days 18250 -CAcreateserial
+[root@vm111]# keytool -keystore hostKeyStore -storepass "비밀번호" -alias clusterCA -import -file clusterCA.pem 
+[root@vm111]# keytool -keystore hostKeyStore -storepass "비밀번호" -alias `hostname -s` -import -file host.signed -keypass "비밀번호"
+
+// 나머지 전체 서버들 동일하게 세팅
+// 전체 서버 대상으로
+// 디렉토리 만들고
+[root@vm111]# ssh root@vm112 mkdir -p /home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+// 필요한 파일 전송
+[root@vm111]# scp clusterCA.key clusterCA.pem clusterTrustStore root@vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+
+// 각 서버별 key store 생성 
+[root@vm112]# export JAVA_HOME=/usr/java/latest
+[root@vm112]# export PATH=$PATH:$JAVA_HOME:$JAVA_HOME/bin
+[root@vm112]# cd /home/fbpuser/hadoop-2.4.1/etc/hadoop/security
+[root@vm112]# keytool -genkeypair -alias `hostname -s` -keyalg RSA -keysize 1024 -dname "CN=`hostname -f`,OU=foo,O=corp" -keypass "비밀번호" -keystore hostKeyStore -storepass "비밀번호" -validity 18250
+[root@vm112]# keytool -keystore hostKeyStore -alias `hostname -s` -certreq -file host.cert -storepass "비밀번호" -keypass "비밀번호"
+[root@vm112# openssl x509 -req -CA clusterCA.pem -CAkey clusterCA.key -in host.cert -out host.signed -days 18250 -CAcreateserial
+[root@vm112]# keytool -keystore hostKeyStore -storepass "비밀번호" -alias clusterCA -import -file clusterCA.pem 
+[root@vm112]# keytool -keystore hostKeyStore -storepass "비밀번호" -alias `hostname -s` -import -file host.signed -keypass "비밀번호"
+```
+
+- SSL 관련 설정파일 세팅
+```
+// 예제 파일을 복사해서 설정파일로 사용함.
+[root@vm111]# cd /home/fbpuser/hadoop-2.4.1/etc/hadoop
+[root@vm111]# cp ssl-client.xml.example ssl-client.xml
+[root@vm111]# cp ssl-server.xml.example ssl-server.xml
+[root@vm111]# vi ssl-client.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+<property>
+  <name>ssl.client.truststore.location</name>
+  <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/security/clusterTrustStore</value>
+</property>
+<property>
+  <name>ssl.client.truststore.password</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.client.truststore.type</name>
+  <value>jks</value>
+</property>
+<property>
+  <name>ssl.client.truststore.reload.interval</name>
+  <value>10000</value>
+</property>
+<property>
+  <name>ssl.client.keystore.location</name>
+  <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/security/hostKeyStore</value>
+</property>
+<property>
+  <name>ssl.client.keystore.password</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.client.keystore.keypassword</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.client.keystore.type</name>
+  <value>jks</value>
+</property>
+ 
+</configuration>
 
 
+[root@vm111]# vi ssl-server.xml
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+ 
+<configuration>
+ 
+<property>
+  <name>ssl.server.truststore.location</name>
+  <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/security/clusterTrustStore</value>
+</property>
+<property>
+  <name>ssl.server.truststore.password</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.server.truststore.type</name>
+  <value>jks</value>
+</property>
+<property>
+  <name>ssl.server.truststore.reload.interval</name>
+  <value>10000</value>
+</property>
+<property>
+  <name>ssl.server.keystore.location</name>
+  <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/security/hostKeyStore</value>
+</property>
+<property>
+  <name>ssl.server.keystore.password</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.server.keystore.keypassword</name>
+  <value>비밀번호</value>
+</property>
+<property>
+  <name>ssl.server.keystore.type</name>
+  <value>jks</value>
+</property>
+ 
+</configuration>
 
 
+##설정 후 ssl-client.xml과 ssl-server.xml을 전체 서버에 배포.
+[root@vm111]# scp ssl-server.xml vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/
+[root@vm111]# scp ssl-client.xml vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/
+```
 
 
+## 확인
+- 클러스터 재시작
 
 
 
