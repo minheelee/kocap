@@ -259,6 +259,22 @@ min.user.id=500
 ```
 
 ## 설정파일
+- 설정파일 수정 전에 먼저 secret file을 생성해줘야 함.
+```
+// core-site.xml의 hadoop.http.authentication.signature.secret.file property에 지정할 secret 파일 생성
+[root@vm111]# dd if=/dev/urandom of=/home/fbpuser/hadoop-2.4.1/etc/hadoop/hadoop-http-auth-signature-secret bs=1024 count=1
+
+// 퍼미션 설정
+// 데몬을 실행시킬 user 소유로 변경
+// 아래는 hdfs 라는 user로 데몬들을 실행시킨다는 가정
+[root@vm111]# chown fbpuser:fbpgroup /home/fbpuser/hadoop-2.4.1/etc/hadoop/hadoop-http-auth-signature-secret
+[root@vm111]# chmod 400 /home/fbpuser/hadoop-2.4.1/etc/hadoop/hadoop-http-auth-signature-secret
+
+// 생성 후 전체 서버 배포
+scp /home/fbpuser/hadoop-2.4.1/etc/hadoop/hadoop-http-auth-signature-secret vm112:/home/fbpuser/hadoop-2.4.1/etc/hadoop/
+```
+
+-  설정파일 수정
 ```
 vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
 <!-- 보안설정 -->
@@ -290,7 +306,7 @@ vi ${HADOOP_HOME}/etc/hadoop/core-site.xml
 </property>
 <property>
     <name>hadoop.http.authentication.signature.secret.file</name>
-    <value>/home/hadoop/etc/hadoop/hadoop-http-auth-signature-secret</value>
+    <value>/home/fbpuser/hadoop-2.4.1/etc/hadoop/hadoop-http-auth-signature-secret</value>
 </property>
 <property>
     <name>hadoop.http.authentication.cookie.domain</name>
@@ -663,8 +679,11 @@ x509_extensions = usr_cert      # The extentions to add to the cert
 - 클러스터 재시작
 
 
-
-
+- 아래와 같이 에러가 발생함.
+- keystore생성 단계에서는 에러가 발생하지 않았음. ?????????
+```
+java.io.FileNotFoundException: /home/fbpuser/.keystore
+```
 
 
 
